@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { LogIn, Eye, EyeOff, AlertCircle, Languages } from 'lucide-react';
+import { LogIn, Eye, EyeOff, AlertCircle, Languages, Moon, Sun } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { useThemeStore } from '../store/useThemeStore';
 
 export function Login() {
   const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const { login, loginError, clearError } = useAuthStore();
+  const { isDark, toggleTheme } = useThemeStore();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -42,15 +44,24 @@ export function Login() {
       <div className="absolute top-0 start-0 w-96 h-96 rounded-full bg-primary/5 dark:bg-primary/10 blur-3xl" />
       <div className="absolute bottom-0 end-0 w-80 h-80 rounded-full bg-purple-300/10 dark:bg-purple-500/5 blur-3xl" />
 
-      {/* Language toggle */}
-      <button
-        onClick={toggleLanguage}
-        className="absolute top-4 end-4 flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
-        aria-label={isAr ? 'Switch to English' : 'التبديل إلى العربية'}
-      >
-        <Languages size={16} />
-        {i18n.language === 'ar' ? 'English' : 'عربي'}
-      </button>
+      {/* Top controls */}
+      <div className="absolute top-4 end-4 flex items-center gap-1">
+        <button
+          onClick={toggleTheme}
+          className="flex items-center justify-center w-10 h-10 rounded-xl text-muted hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
+          aria-label={isDark ? (isAr ? 'الوضع الفاتح' : 'Light mode') : (isAr ? 'الوضع الداكن' : 'Dark mode')}
+        >
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted hover:bg-white/50 dark:hover:bg-white/5 transition-colors"
+          aria-label={isAr ? 'Switch to English' : 'التبديل إلى العربية'}
+        >
+          <Languages size={16} />
+          {i18n.language === 'ar' ? 'English' : 'عربي'}
+        </button>
+      </div>
 
       <motion.div
         className="w-full max-w-md relative z-10"
