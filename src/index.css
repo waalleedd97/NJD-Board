@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@variant dark (&:is(.dark *));
+
+@theme {
+  --color-primary: #7C3AED;
+  --color-primary-light: #A78BFA;
+  --color-primary-dark: #6D28D9;
+  --color-lavender: #EDE9FE;
+  --color-ink: #1E1B2E;
+  --color-muted: #6B7280;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-night: #0F0E17;
+  --color-surface: #1A1827;
+  --color-night-accent: #A78BFA;
+  --color-night-border: #2D2B3D;
+
+  --font-sans: 'Inter', 'Tajawal', system-ui, sans-serif;
+  --font-arabic: 'Tajawal', 'Inter', system-ui, sans-serif;
+}
+
+/* Base */
+html {
+  font-family: var(--font-sans);
+}
+
+html[dir="rtl"] {
+  font-family: var(--font-arabic);
+}
+
+body {
+  margin: 0;
+  background-color: #ffffff;
+  color: var(--color-ink);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.dark body {
+  background-color: var(--color-night);
+  color: #f3f4f6;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+
+/* Background dot pattern */
+.bg-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgba(124, 58, 237, 0.04) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.dark .bg-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgba(167, 139, 250, 0.06) 1px, transparent 0);
+}
