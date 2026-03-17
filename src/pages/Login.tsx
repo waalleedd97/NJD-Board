@@ -183,64 +183,9 @@ export function Login() {
             </button>
           </form>
 
-          {/* Demo accounts */}
-          <div className="mt-6 pt-5 border-t border-gray-200/50 dark:border-white/5">
-            <p className="text-xs text-muted dark:text-gray-500 mb-3 text-center">
-              {isAr ? 'حسابات تجريبية' : 'Demo Accounts'}
-            </p>
-            <div className="grid grid-cols-1 gap-2">
-              <DemoAccount
-                label={isAr ? 'مدير النظام' : 'System Admin'}
-                username="admin"
-                password="admin123"
-                role={isAr ? 'وصول كامل' : 'Full access'}
-                avatar="\u{1F451}"
-                onClick={() => { setUsername('admin'); setPassword('admin123'); }}
-              />
-              <DemoAccount
-                label={isAr ? 'موظف' : 'Employee'}
-                username="waleed"
-                password="waleed123"
-                role={isAr ? 'وصول الموظف' : 'Employee access'}
-                avatar="\u{1F468}\u{200D}\u{1F4BB}"
-                onClick={() => { setUsername('waleed'); setPassword('waleed123'); }}
-              />
-            </div>
-          </div>
         </div>
       </motion.div>
     </div>
   );
 }
 
-function DemoAccount({
-  label,
-  username,
-  password,
-  role,
-  avatar,
-  onClick,
-}: {
-  label: string;
-  username: string;
-  password: string;
-  role: string;
-  avatar: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-3 p-3 rounded-xl text-start hover:bg-gray-50 dark:hover:bg-white/5 border border-gray-200/50 dark:border-white/5 transition-colors group"
-    >
-      <span className="text-xl">{avatar}</span>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-ink dark:text-white">{label}</p>
-        <p className="text-xs text-muted dark:text-gray-400">{role}</p>
-      </div>
-      <code className="text-[10px] text-muted dark:text-gray-500 bg-gray-100 dark:bg-white/5 px-2 py-1 rounded font-mono opacity-0 group-hover:opacity-100 transition-opacity">
-        {username} / {password}
-      </code>
-    </button>
-  );
-}

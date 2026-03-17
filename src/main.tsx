@@ -5,9 +5,9 @@ import './i18n';
 import './index.css';
 import App from './App';
 
-// Restore saved theme before first paint
+// Restore saved theme before first paint (default: light)
 const saved = localStorage.getItem('theme');
-if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+if (saved === 'dark') {
   document.documentElement.classList.add('dark');
 }
 
