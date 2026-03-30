@@ -166,7 +166,7 @@ export function Board() {
   return (
     <div className="min-h-screen">
       {/* Board area — adds padding when panel open */}
-      <div className={`transition-[padding] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden ${panelOpen ? (isAr ? 'pr-0 pl-[44%]' : 'pl-0 pr-[44%]') : ''}`} onClick={() => { if (panelOpen) setSelectedTask(null); }}>
+      <div className={`overflow-hidden ${panelOpen ? (isAr ? 'pr-0 pl-[44%]' : 'pl-0 pr-[44%]') : ''}`} onClick={() => { if (panelOpen) setSelectedTask(null); }}>
       <div className="p-6 space-y-6">
         {/* Context summary */}
         <p className="text-xs text-muted dark:text-gray-400">
