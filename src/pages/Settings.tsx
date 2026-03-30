@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   Palette,
   Languages,
+  Bell,
   Sun,
   Moon,
   Check,
@@ -13,13 +14,15 @@ import {
 
 import { GlassCard } from '../components/ui/GlassCard';
 import { useThemeStore } from '../store/useThemeStore';
+import { useNotificationStore } from '../store/useNotificationStore';
 import { useAuthStore } from '../store/useAuthStore';
 
-type SettingsTab = 'appearance' | 'language' | 'about';
+type SettingsTab = 'appearance' | 'language' | 'notifications' | 'about';
 
 const tabs: { id: SettingsTab; icon: typeof Palette; labelEn: string; labelAr: string }[] = [
   { id: 'appearance', icon: Palette, labelEn: 'Appearance', labelAr: 'المظهر' },
   { id: 'language', icon: Languages, labelEn: 'Language', labelAr: 'اللغة' },
+  { id: 'notifications', icon: Bell, labelEn: 'Notifications', labelAr: 'الإشعارات' },
   { id: 'about', icon: Info, labelEn: 'About', labelAr: 'حول' },
 ];
 
@@ -57,6 +60,7 @@ export function Settings() {
           <div>
             {activeTab === 'appearance' && <AppearanceSettings />}
             {activeTab === 'language' && <LanguageSettings />}
+            {activeTab === 'notifications' && <NotificationSettings />}
             {activeTab === 'about' && <AboutSettings />}
           </div>
         </div>
@@ -167,6 +171,67 @@ function LanguageSettings() {
   );
 }
 
+function NotificationSettings() {
+  const { i18n } = useTranslation();
+  const isAr = i18n.language === 'ar';
+  const { prefs, togglePref } = useNotificationStore();
+
+  const items: { key: keyof typeof prefs; labelEn: string; labelAr: string; descEn: string; descAr: string }[] = [
+    { key: 'email', labelEn: 'Email Notifications', labelAr: 'إشعارات البريد الإلكتروني', descEn: 'Receive task updates via email', descAr: 'استلام تحديثات المهام عبر البريد' },
+    { key: 'push', labelEn: 'Push Notifications', labelAr: 'الإشعارات الفورية', descEn: 'Browser push notifications for urgent updates', descAr: 'إشعارات المتصفح للتحديثات العاجلة' },
+    { key: 'taskReminders', labelEn: 'Task Reminders', labelAr: 'تذكيرات المهام', descEn: 'Get reminded about upcoming task deadlines', descAr: 'تذكير بالمواعيد النهائية للمهام' },
+    { key: 'sprintUpdates', labelEn: 'Sprint Updates', labelAr: 'تحديثات السبرينت', descEn: 'Daily sprint progress summaries', descAr: 'ملخصات يومية لتقدم السبرينت' },
+    { key: 'teamActivity', labelEn: 'Team Activity', labelAr: 'نشاط الفريق', descEn: 'Updates when team members complete tasks', descAr: 'تحديثات عند إكمال أعضاء الفريق للمهام' },
+  ];
+
+  return (
+    <GlassCard delay={0.05}>
+      <h3 className="text-lg font-bold text-ink dark:text-white mb-1">
+        {isAr ? 'الإشعارات' : 'Notifications'}
+      </h3>
+      <p className="text-sm text-muted dark:text-gray-400 mb-5">
+        {isAr ? 'إدارة تفضيلات الإشعارات - يتم حفظ التغييرات تلقائياً' : 'Manage notification preferences — changes are saved automatically'}
+      </p>
+      <div className="space-y-4">
+        {items.map((item) => (
+          <div
+            key={item.key}
+            className="flex items-center justify-between py-3 border-b border-gray-200/50 dark:border-white/5 last:border-0"
+          >
+            <div>
+              <p className="text-sm font-medium text-ink dark:text-white">
+                {isAr ? item.labelAr : item.labelEn}
+              </p>
+              <p className="text-xs text-muted dark:text-gray-400">
+                {isAr ? item.descAr : item.descEn}
+              </p>
+            </div>
+            <button
+              onClick={() => togglePref(item.key)}
+              className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0
+                ${prefs[item.key] ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}
+              `}
+              role="switch"
+              aria-checked={prefs[item.key]}
+              aria-label={isAr ? item.labelAr : item.labelEn}
+            >
+              <motion.div
+                className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm"
+                animate={{
+                  left: prefs[item.key]
+                    ? document.documentElement.dir === 'rtl' ? 2 : 22
+                    : document.documentElement.dir === 'rtl' ? 22 : 2,
+                }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              />
+            </button>
+          </div>
+        ))}
+      </div>
+    </GlassCard>
+  );
+}
+
 function AboutSettings() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
@@ -212,9 +277,28 @@ function AboutSettings() {
             <p className="text-sm text-muted dark:text-gray-400">{t('settings.version')} 1.0.0</p>
           </div>
         </div>
-        <p className="text-sm text-muted dark:text-gray-400">{t('settings.appDescription')}</p>
+        <p className="text-sm text-muted dark:text-gray-400 mb-6">{t('settings.appDescription')}</p>
+        <div className="space-y-3 text-sm">
+          <InfoRow label={isAr ? 'المنصة' : 'Platform'} value="React + TypeScript + Vite" />
+          <InfoRow label={isAr ? 'التصميم' : 'UI Framework'} value="Tailwind CSS + Framer Motion" />
+          <InfoRow label={isAr ? 'إدارة الحالة' : 'State'} value="Zustand" />
+          <InfoRow label={isAr ? 'الدعم اللغوي' : 'i18n'} value={isAr ? 'العربية والإنجليزية' : 'Arabic & English'} />
+        </div>
+        <div className="mt-6 pt-4 border-t border-gray-200/50 dark:border-white/5">
+          <p className="text-xs text-muted dark:text-gray-500 text-center">
+            {isAr ? 'صُنع بـ ❤️ بواسطة فريق NJD Games' : 'Made with ❤️ by the NJD Games team'}
+          </p>
+        </div>
       </GlassCard>
     </div>
   );
 }
 
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-2 border-b border-gray-200/30 dark:border-white/5 last:border-0">
+      <span className="text-muted dark:text-gray-400">{label}</span>
+      <span className="font-medium text-ink dark:text-white">{value}</span>
+    </div>
+  );
+}
