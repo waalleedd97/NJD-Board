@@ -1,23 +1,35 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Sparkles, X, ClipboardList, Palette, FolderKanban } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { TopBar } from '../components/layout/TopBar';
+
 import { GlassCard } from '../components/ui/GlassCard';
 import { KPICard } from '../components/ui/KPICard';
 import { ProgressRing } from '../components/ui/ProgressRing';
 import { ActivityFeed } from '../components/ui/ActivityFeed';
 import { TeamAvailability } from '../components/ui/TeamAvailability';
-import { useAuthStore } from '../store/useAuthStore';
-import { kpis, projects, activities, teamMembers, sprintInfo } from '../data/mockData';
+import { useAuthStore, useIsAdmin } from '../store/useAuthStore';
+import { useDataStore } from '../store/useDataStore';
 
 export function Dashboard() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const { user } = useAuthStore();
+  const isAdmin = useIsAdmin();
+  const { projects, tasks, activities, teamMembers, sprints } = useDataStore();
   const navigate = useNavigate();
   const [fabOpen, setFabOpen] = useState(false);
+
+  const activeSprint = sprints.find((s) => s.status === 'active');
+  const inProgressCount = tasks.filter((t) => t.status === 'in-progress').length;
+
+  const kpis = useMemo(() => [
+    { labelEn: 'Total Tasks', labelAr: 'إجمالي المهام', value: tasks.length, change: 0, color: '#7C3AED', icon: 'clipboard' },
+    { labelEn: 'Completed', labelAr: 'مكتملة', value: tasks.filter((t) => t.status === 'done').length, change: 0, color: '#10B981', icon: 'check-circle' },
+    { labelEn: 'In Progress', labelAr: 'قيد التنفيذ', value: inProgressCount, change: 0, color: '#3B82F6', icon: 'timer' },
+    { labelEn: 'Overdue', labelAr: 'متأخرة', value: tasks.filter((t) => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done').length, change: 0, color: '#EF4444', icon: 'alert-triangle' },
+  ], [tasks, inProgressCount]);
 
   const fabActions = [
     {
@@ -45,12 +57,10 @@ export function Dashboard() {
 
   const displayName = user
     ? (isAr ? user.nameAr : user.name)
-    : sprintInfo.teamName;
+    : 'NJD Games';
 
   return (
     <div className="min-h-screen">
-      <TopBar title={t('nav.dashboard')} />
-
       <div className="p-6 space-y-6 max-w-[1400px]">
         {/* Welcome Banner */}
         <motion.div
@@ -66,14 +76,14 @@ export function Dashboard() {
             <div className="flex items-center gap-2 mb-3">
               <Sparkles size={18} className="text-purple-200" />
               <span className="text-purple-200 text-sm font-medium">
-                {t('dashboard.currentSprint')}: {isAr ? sprintInfo.nameAr : sprintInfo.nameEn}
+                {t('dashboard.currentSprint')}: {activeSprint ? (isAr ? activeSprint.nameAr : activeSprint.name) : ''}
               </span>
             </div>
             <h2 className="text-3xl font-extrabold text-white mb-2">
               {t('dashboard.welcome')} {displayName} 👋
             </h2>
             <p className="text-purple-200 text-base">
-              {t('dashboard.sprintSubtitle', { count: 42 })}
+              {t('dashboard.sprintSubtitle', { count: inProgressCount })}
             </p>
           </div>
         </motion.div>
@@ -120,8 +130,8 @@ export function Dashboard() {
         </GlassCard>
       </div>
 
-      {/* FAB with menu */}
-      <div className="fixed bottom-6 end-6 z-50">
+      {/* FAB with menu — admin only */}
+      {isAdmin && <div className="fixed bottom-6 end-6 z-50">
         <AnimatePresence>
           {fabOpen && (
             <motion.div
@@ -177,10 +187,10 @@ export function Dashboard() {
             {fabOpen ? <X size={24} /> : <Plus size={24} />}
           </motion.div>
         </motion.button>
-      </div>
+      </div>}
 
       {/* Backdrop for FAB menu */}
-      <AnimatePresence>
+      {isAdmin && <AnimatePresence>
         {fabOpen && (
           <motion.div
             className="fixed inset-0 z-40"
@@ -190,7 +200,7 @@ export function Dashboard() {
             onClick={() => setFabOpen(false)}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence>}
     </div>
   );
 }

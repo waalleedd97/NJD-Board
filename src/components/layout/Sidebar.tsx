@@ -9,14 +9,12 @@ import {
   Timer,
   Users,
   Settings,
-  Moon,
-  Sun,
-  Languages,
+  Upload,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react';
-import { useThemeStore } from '../../store/useThemeStore';
 import { useSidebarStore } from '../../store/useSidebarStore';
+import { useIsAdmin } from '../../store/useAuthStore';
 import { Icon3D } from '../icons/Icon3D';
 
 const navItems = [
@@ -25,64 +23,42 @@ const navItems = [
   { path: '/board', icon: Columns3, labelKey: 'nav.board', color: 'cyan' },
   { path: '/design-items', icon: Palette, labelKey: 'nav.designItems', color: 'pink' },
   { path: '/sprints', icon: Timer, labelKey: 'nav.sprints', color: 'amber' },
-  { path: '/team', icon: Users, labelKey: 'nav.team', color: 'green' },
+  { path: '/team', icon: Users, labelKey: 'nav.team', color: 'green', adminOnly: true },
+  { path: '/import', icon: Upload, labelKey: 'nav.import', color: 'cyan', adminOnly: true },
   { path: '/settings', icon: Settings, labelKey: 'nav.settings', color: 'gray' },
 ];
 
 export function Sidebar() {
   const { t, i18n } = useTranslation();
   const location = useLocation();
-  const { isDark, toggleTheme } = useThemeStore();
   const { isCollapsed, toggleCollapse } = useSidebarStore();
   const isRTL = i18n.language === 'ar';
+  const isAdmin = useIsAdmin();
 
-  const toggleLanguage = () => {
-    const next = i18n.language === 'ar' ? 'en' : 'ar';
-    i18n.changeLanguage(next);
-    localStorage.setItem('i18nextLng', next);
-    document.documentElement.lang = next;
-    document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
-  };
+  const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <motion.aside
-      className="
-        fixed top-0 start-0 h-screen z-40
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className={`
+        fixed z-40
         bg-white/90 dark:bg-surface/90
         backdrop-blur-xl
-        border-e border-gray-200/50 dark:border-white/5
         flex flex-col
-      "
+        ${isRTL ? 'border-l' : 'border-r'} border-gray-200/50 dark:border-white/5
+      `}
+      style={{
+        top: 'var(--njd-navbar-height, 64px)',
+        height: 'calc(100dvh - var(--njd-navbar-height, 64px))',
+        [isRTL ? 'right' : 'left']: 0,
+      }}
       animate={{ width: isCollapsed ? 80 : 272 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
     >
-      {/* ── Logo ─────────────────────────── */}
-      <div className="flex items-center gap-3 px-5 h-[72px] border-b border-gray-200/50 dark:border-white/5 shrink-0">
-        <motion.div
-          className="flex items-center justify-center w-10 h-10 shrink-0"
-          whileHover={{ scale: 1.08 }}
-          transition={{ type: 'spring', stiffness: 300 }}
-        >
-          <img src="/njd-logo.png" alt="NJD Games" className="w-10 h-10 object-contain" />
-        </motion.div>
-        <AnimatePresence>
-          {!isCollapsed && (
-            <motion.span
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              className="font-bold text-lg text-ink dark:text-white whitespace-nowrap"
-            >
-              NJD Board
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </div>
-
       {/* ── Nav ──────────────────────────── */}
       <nav className="flex-1 py-4 px-3 overflow-y-auto">
         <ul className="space-y-1">
-          {navItems.map((item) => {
+          {visibleItems.map((item) => {
             const active = location.pathname === item.path;
             return (
               <li key={item.path}>
@@ -118,7 +94,10 @@ export function Sidebar() {
 
                   {/* Tooltip when collapsed */}
                   {isCollapsed && (
-                    <div className="pointer-events-none absolute start-full ms-2 opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                    <div
+                      className="pointer-events-none absolute opacity-0 group-hover:opacity-100 transition-opacity z-50"
+                      style={{ [isRTL ? 'right' : 'left']: '100%', [isRTL ? 'marginRight' : 'marginLeft']: 8 }}
+                    >
                       <div className="bg-ink text-white text-xs font-medium rounded-lg px-3 py-1.5 whitespace-nowrap shadow-lg">
                         {t(item.labelKey)}
                       </div>
@@ -132,19 +111,7 @@ export function Sidebar() {
       </nav>
 
       {/* ── Bottom controls ──────────────── */}
-      <div className="px-3 pb-4 pt-3 space-y-1 border-t border-gray-200/50 dark:border-white/5 shrink-0">
-        <SidebarButton
-          icon={isDark ? <Sun size={20} /> : <Moon size={20} />}
-          label={isDark ? t('common.lightMode') : t('common.darkMode')}
-          collapsed={isCollapsed}
-          onClick={toggleTheme}
-        />
-        <SidebarButton
-          icon={<Languages size={20} />}
-          label={i18n.language === 'ar' ? 'English' : 'عربي'}
-          collapsed={isCollapsed}
-          onClick={toggleLanguage}
-        />
+      <div className="px-3 pb-4 pt-3 border-t border-gray-200/50 dark:border-white/5 shrink-0">
         <SidebarButton
           icon={
             isCollapsed

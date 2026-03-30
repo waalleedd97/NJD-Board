@@ -9,6 +9,7 @@
     "designItems": "عناصر التصميم",
     "sprints": "السبرينت",
     "team": "الفريق",
+    "import": "استيراد",
     "settings": "الإعدادات"
   },
   "dashboard": {
@@ -211,6 +212,9 @@
     "sent": "تم الإرسال!",
     "sentInvitations": "الدعوات المرسلة",
     "pending": "معلقة"
+  },
+  "import": {
+    "title": "استيراد البيانات"
   },
   "status": {
     "todo": "قيد الانتظار",

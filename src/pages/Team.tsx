@@ -12,13 +12,13 @@ import {
   Send,
   CheckCircle,
 } from 'lucide-react';
-import { TopBar } from '../components/layout/TopBar';
+
 import { GlassCard } from '../components/ui/GlassCard';
 import { Icon3D } from '../components/icons/Icon3D';
 import { FilterBar } from '../components/ui/FilterBar';
 import { EmptyState } from '../components/ui/EmptyState';
-import { useAuthStore } from '../store/useAuthStore';
-import { teamMembers, tasks } from '../data/mockData';
+import { useAuthStore, useIsAdmin } from '../store/useAuthStore';
+import { useDataStore } from '../store/useDataStore';
 import type { TeamMember } from '../data/mockData';
 
 const statusDot: Record<string, string> = {
@@ -36,8 +36,9 @@ const statusBg: Record<string, string> = {
 export function Team() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
-  const { user } = useAuthStore();
-  const isAdmin = user?.role === 'admin';
+  useAuthStore();
+  const { teamMembers } = useDataStore();
+  const isAdmin = useIsAdmin();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
@@ -62,13 +63,13 @@ export function Team() {
 
   const availableCount = teamMembers.filter((m) => m.status === 'available').length;
   const busyCount = teamMembers.filter((m) => m.status === 'busy').length;
-  const avgWorkload = Math.round(
-    teamMembers.reduce((sum, m) => sum + m.workload, 0) / teamMembers.length
-  );
+  const avgWorkload = teamMembers.length > 0
+    ? Math.round(teamMembers.reduce((sum, m) => sum + m.workload, 0) / teamMembers.length)
+    : 0;
 
   return (
     <div className="min-h-screen">
-      <TopBar title={t('team.title')} />
+
 
       <div className="p-6 space-y-6 max-w-[1400px]">
         {/* Stats */}
@@ -195,6 +196,7 @@ function TeamCard({
   onClick: () => void;
 }) {
   const { t } = useTranslation();
+  const { tasks } = useDataStore();
   const memberTasks = tasks.filter((task) => task.assigneeId === member.id);
   const activeTasks = memberTasks.filter((task) => task.status !== 'done').length;
 
@@ -282,6 +284,7 @@ function MemberDetailModal({
   onClose: () => void;
 }) {
   const { t } = useTranslation();
+  const { tasks } = useDataStore();
   const memberTasks = tasks.filter((task) => task.assigneeId === member.id);
   const completedTasks = memberTasks.filter((task) => task.status === 'done').length;
   const activeTasks = memberTasks.filter((task) => task.status !== 'done').length;

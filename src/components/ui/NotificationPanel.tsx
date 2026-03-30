@@ -63,8 +63,9 @@ export function NotificationPanel() {
       {isOpen && (
         <motion.div
           ref={panelRef}
+          dir={isAr ? 'rtl' : 'ltr'}
           className="
-            absolute top-full end-0 mt-2
+            absolute top-full mt-2
             w-[380px] max-h-[500px]
             rounded-2xl overflow-hidden
             bg-white dark:bg-surface
@@ -72,6 +73,7 @@ export function NotificationPanel() {
             shadow-2xl shadow-black/10 dark:shadow-black/40
             z-50
           "
+          style={{ [isAr ? 'left' : 'right']: 0 }}
           initial={{ opacity: 0, y: -8, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.96 }}
@@ -134,7 +136,7 @@ export function NotificationPanel() {
                   {/* Avatar + type indicator */}
                   <div className="relative shrink-0 mt-0.5">
                     <span className="text-xl">{notification.avatar}</span>
-                    <span className={`absolute -bottom-0.5 -end-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-surface ${typeColors[notification.type]}`} />
+                    <span className={`absolute -bottom-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-surface ${typeColors[notification.type]}`} style={{ [isAr ? 'left' : 'right']: -2 }} />
                   </div>
 
                   {/* Content */}

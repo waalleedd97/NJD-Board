@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@variant dark (&:is(.dark *));
+@variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-primary: #7C3AED;
@@ -34,10 +34,9 @@ body {
   margin: 0;
   background-color: #ffffff;
   color: var(--color-ink);
-  transition: background-color 0.3s, color 0.3s;
 }
 
-.dark body {
+html.dark body {
   background-color: var(--color-night);
   color: #f3f4f6;
 }

@@ -9,6 +9,7 @@
     "designItems": "Design Items",
     "sprints": "Sprints",
     "team": "Team",
+    "import": "Import",
     "settings": "Settings"
   },
   "dashboard": {
@@ -211,6 +212,9 @@
     "sent": "Sent!",
     "sentInvitations": "Sent Invitations",
     "pending": "Pending"
+  },
+  "import": {
+    "title": "Import Data"
   },
   "status": {
     "todo": "To Do",

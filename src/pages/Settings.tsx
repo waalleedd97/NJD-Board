@@ -11,7 +11,7 @@ import {
   Info,
   Shield,
 } from 'lucide-react';
-import { TopBar } from '../components/layout/TopBar';
+
 import { GlassCard } from '../components/ui/GlassCard';
 import { useThemeStore } from '../store/useThemeStore';
 import { useNotificationStore } from '../store/useNotificationStore';
@@ -27,14 +27,12 @@ const tabs: { id: SettingsTab; icon: typeof Palette; labelEn: string; labelAr: s
 ];
 
 export function Settings() {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
 
   return (
     <div className="min-h-screen">
-      <TopBar title={t('settings.title')} />
-
       <div className="p-6 max-w-[900px]">
         <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6">
           {/* Sidebar tabs */}
@@ -237,7 +235,7 @@ function NotificationSettings() {
 function AboutSettings() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
-  const { user } = useAuthStore();
+  const { user, role } = useAuthStore();
 
   return (
     <div className="space-y-4">
@@ -256,7 +254,7 @@ function AboutSettings() {
               <div className="flex items-center gap-1.5 mt-1">
                 <Shield size={12} className="text-primary" />
                 <span className="text-xs font-medium text-primary dark:text-night-accent capitalize">
-                  {user.role === 'admin' ? (isAr ? 'مدير النظام' : 'System Admin') : (isAr ? 'موظف' : 'Employee')}
+                  {role === 'super_admin' ? (isAr ? 'مدير النظام' : 'Super Admin') : (isAr ? 'موظف' : 'Employee')}
                 </span>
               </div>
             </div>

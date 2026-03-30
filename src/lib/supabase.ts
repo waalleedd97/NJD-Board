@@ -1,16 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+// Auth client — login, session, user info
+const AUTH_URL = 'https://iauulqfgrbegwcnfatmx.supabase.co';
+const AUTH_KEY = 'sb_publishable_Dvk_dI_FY6oxhyOw7__06Q_wzDmwguJ';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    'Supabase credentials not found. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env'
-  );
-}
+export const supabase = createClient<Database>(AUTH_URL, AUTH_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+  },
+});
 
-export const supabase = createClient<Database>(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder',
-);
+// Data client — projects, sprints, tasks, design_items
+const DATA_URL = 'https://xdiqvvctdwbexfyoqrzh.supabase.co';
+const DATA_KEY = 'sb_publishable_2u374LLFIgxGUYANUhJUvA_WcGGxHft';
+
+export const supabaseData = createClient(DATA_URL, DATA_KEY, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
