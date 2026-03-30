@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Palette,
   Languages,
@@ -174,14 +174,19 @@ function LanguageSettings() {
 function NotificationSettings() {
   const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
-  const { prefs, togglePref } = useNotificationStore();
+  const { prefs, updatePref, prefsLoaded, loadPrefs } = useNotificationStore();
+  const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    if (user?.id && !prefsLoaded) loadPrefs(user.id);
+  }, [user?.id, prefsLoaded, loadPrefs]);
 
   const items: { key: keyof typeof prefs; labelEn: string; labelAr: string; descEn: string; descAr: string }[] = [
-    { key: 'email', labelEn: 'Email Notifications', labelAr: 'إشعارات البريد الإلكتروني', descEn: 'Receive task updates via email', descAr: 'استلام تحديثات المهام عبر البريد' },
-    { key: 'push', labelEn: 'Push Notifications', labelAr: 'الإشعارات الفورية', descEn: 'Browser push notifications for urgent updates', descAr: 'إشعارات المتصفح للتحديثات العاجلة' },
-    { key: 'taskReminders', labelEn: 'Task Reminders', labelAr: 'تذكيرات المهام', descEn: 'Get reminded about upcoming task deadlines', descAr: 'تذكير بالمواعيد النهائية للمهام' },
-    { key: 'sprintUpdates', labelEn: 'Sprint Updates', labelAr: 'تحديثات السبرينت', descEn: 'Daily sprint progress summaries', descAr: 'ملخصات يومية لتقدم السبرينت' },
-    { key: 'teamActivity', labelEn: 'Team Activity', labelAr: 'نشاط الفريق', descEn: 'Updates when team members complete tasks', descAr: 'تحديثات عند إكمال أعضاء الفريق للمهام' },
+    { key: 'email_notifications', labelEn: 'Email Notifications', labelAr: 'إشعارات البريد الإلكتروني', descEn: 'Receive task updates via email', descAr: 'استلام تحديثات المهام عبر البريد' },
+    { key: 'push_notifications', labelEn: 'Push Notifications', labelAr: 'الإشعارات الفورية', descEn: 'Browser push notifications for urgent updates', descAr: 'إشعارات المتصفح للتحديثات العاجلة' },
+    { key: 'task_reminders', labelEn: 'Task Reminders', labelAr: 'تذكيرات المهام', descEn: 'Get reminded about upcoming task deadlines', descAr: 'تذكير بالمواعيد النهائية للمهام' },
+    { key: 'sprint_updates', labelEn: 'Sprint Updates', labelAr: 'تحديثات السبرينت', descEn: 'Daily sprint progress summaries', descAr: 'ملخصات يومية لتقدم السبرينت' },
+    { key: 'team_activity', labelEn: 'Team Activity', labelAr: 'نشاط الفريق', descEn: 'Updates when team members complete tasks', descAr: 'تحديثات عند إكمال أعضاء الفريق للمهام' },
   ];
 
   return (
@@ -207,7 +212,7 @@ function NotificationSettings() {
               </p>
             </div>
             <button
-              onClick={() => togglePref(item.key)}
+              onClick={() => user && updatePref(user.id, item.key, !prefs[item.key])}
               className={`relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0
                 ${prefs[item.key] ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}
               `}
