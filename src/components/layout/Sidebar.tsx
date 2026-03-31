@@ -16,7 +16,6 @@ import {
 import { useSidebarStore } from '../../store/useSidebarStore';
 import { useIsAdmin } from '../../store/useAuthStore';
 import { Icon3D } from '../icons/Icon3D';
-import { NotificationBell } from '../ui/NotificationBell';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', color: 'purple' },
@@ -56,16 +55,8 @@ export function Sidebar() {
       animate={{ width: isCollapsed ? 80 : 272 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
     >
-      {/* ── Notification bell ──────────────── */}
-      <div className="px-3 pt-3 pb-1 shrink-0">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-          {!isCollapsed && <span className="text-xs font-medium text-muted dark:text-gray-500 uppercase tracking-wide">{isRTL ? 'القائمة' : 'Menu'}</span>}
-          <NotificationBell />
-        </div>
-      </div>
-
       {/* ── Nav ──────────────────────────── */}
-      <nav className="flex-1 py-2 px-3 overflow-y-auto">
+      <nav className="flex-1 py-4 px-3 overflow-y-auto">
         <ul className="space-y-1">
           {visibleItems.map((item) => {
             const active = location.pathname === item.path;

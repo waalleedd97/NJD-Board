@@ -22,12 +22,13 @@ function timeAgo(dateStr: string, isAr: boolean): string {
   return isAr ? `منذ ${days} ي` : `${days}d ago`;
 }
 
+/** Notification dropdown panel — rendered in AppLayout, toggled by navbar bell */
 export function NotificationBell() {
   const { i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const { notifications, isOpen, togglePanel, closePanel, markAsRead, markAllRead, dismissNotification, init } = useNotificationStore();
+  const { notifications, isOpen, closePanel, markAsRead, markAllRead, dismissNotification, init } = useNotificationStore();
   const panelRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -69,32 +70,15 @@ export function NotificationBell() {
   };
 
   return (
-    <div className="relative" ref={panelRef}>
-      {/* Bell button */}
-      <button
-        onClick={togglePanel}
-        className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-        aria-label={isAr ? 'الإشعارات' : 'Notifications'}
-      >
-        <Bell size={20} className="text-muted dark:text-gray-400" />
-        {unreadCount > 0 && (
-          <motion.span
-            className="absolute -top-0.5 -end-0.5 min-w-[18px] h-[18px] rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center px-1"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 500 }}
-          >
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </motion.span>
-        )}
-      </button>
-
-      {/* Dropdown panel */}
-      <AnimatePresence>
-        {isOpen && (
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          ref={panelRef}
+          className="fixed z-50"
+          style={{ top: 'var(--njd-navbar-height, 64px)', [isAr ? 'left' : 'right']: 16 }}
+        >
           <motion.div
-            className="absolute top-full mt-2 w-[360px] max-h-[420px] rounded-2xl overflow-hidden bg-white dark:bg-surface border border-gray-200/50 dark:border-white/10 shadow-2xl z-50"
-            style={{ [isAr ? 'right' : 'left']: 0 }}
+            className="w-[360px] max-h-[420px] rounded-2xl overflow-hidden bg-white dark:bg-surface border border-gray-200/50 dark:border-white/10 shadow-2xl"
             initial={{ opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
@@ -159,8 +143,8 @@ export function NotificationBell() {
               )}
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
