@@ -22,7 +22,7 @@ import {
 import { FilterBar } from '../components/ui/FilterBar';
 import { boardColumns } from '../data/mockData';
 import { useDataStore } from '../store/useDataStore';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore, useIsAdmin } from '../store/useAuthStore';
 import { supabaseData } from '../lib/supabase';
 import { uploadFile, isImageFile } from '../lib/upload';
 import type { Task, TaskStatus } from '../data/mockData';
@@ -370,10 +370,14 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
   const commentFileRef = useRef<HTMLInputElement>(null);
 
   // Attachments
-  const [attachments, setAttachments] = useState<{ id: string; file_name: string; file_url: string; created_at: string }[]>([]);
+  const [attachments, setAttachments] = useState<{ id: string; file_name: string; file_url: string; uploaded_by: string; created_at: string }[]>([]);
   const [uploading, setUploading] = useState(false);
   const attachFileRef = useRef<HTMLInputElement>(null);
   const [lightboxUrl, setLightboxUrl] = useState('');
+  const isAdmin = useIsAdmin();
+  const userId = currentUser?.id ?? '';
+
+  const canDeleteAttachment = (a: { uploaded_by: string }) => isAdmin || a.uploaded_by === userId;
 
   useEffect(() => {
     supabaseData.from('comments').select('*').eq('task_id', task.id).order('created_at', { ascending: true })
@@ -384,11 +388,12 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
 
   const handleAddComment = async () => {
     if (!commentText.trim() && !commentImage) return;
+    if (!userId) return;
     setSendingComment(true);
     const userName = currentUser ? (isAr ? currentUser.nameAr : currentUser.name) : 'Unknown';
     let imageUrl: string | null = null;
     if (commentImage) {
-      const result = await uploadFile(commentImage, `comments/${task.id}`);
+      const result = await uploadFile(commentImage, `comments/${task.id}`, userId);
       if (result) imageUrl = result.url;
     }
     const { data } = await supabaseData.from('comments').insert({
@@ -412,14 +417,13 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
 
   const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !isImageFile(file)) return;
+    if (!file || !isImageFile(file) || !userId) return;
     e.target.value = '';
     setUploading(true);
-    const userName = currentUser ? (isAr ? currentUser.nameAr : currentUser.name) : 'Unknown';
-    const result = await uploadFile(file, `tasks/${task.id}`);
+    const result = await uploadFile(file, `tasks/${task.id}`, userId);
     if (result) {
       const { data } = await supabaseData.from('attachments' as never).insert({
-        task_id: task.id, file_name: result.name, file_url: result.url, file_size: result.size, uploaded_by: userName,
+        task_id: task.id, file_name: result.name, file_url: result.url, file_size: result.size, uploaded_by: userId,
       } as never).select('*');
       if (data?.[0]) setAttachments((prev) => [...prev, data[0] as typeof attachments[0]]);
     }
@@ -427,6 +431,8 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
   };
 
   const handleDeleteAttachment = async (id: string) => {
+    const att = attachments.find((a) => a.id === id);
+    if (!att || !canDeleteAttachment(att)) return;
     await supabaseData.from('attachments' as never).delete().eq('id', id);
     setAttachments((prev) => prev.filter((a) => a.id !== id));
   };
@@ -541,7 +547,7 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
                 {attachments.map((a) => (
                   <div key={a.id} className="group relative rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 aspect-square">
                     <img src={a.file_url} alt={a.file_name} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(a.file_url)} />
-                    <button onClick={() => handleDeleteAttachment(a.id)} className="absolute top-1 end-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={10} /></button>
+                    {canDeleteAttachment(a) && <button onClick={() => handleDeleteAttachment(a.id)} className="absolute top-1 end-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={10} /></button>}
                   </div>
                 ))}
               </div>

@@ -1,12 +1,20 @@
-import { supabaseData } from './supabase';
+import { supabase } from './supabase';
 
 const BUCKET = 'attachments';
 
-export async function uploadFile(file: File, folder: string): Promise<{ url: string; name: string; size: number } | null> {
+/**
+ * Upload a file to Supabase Storage on the AUTH project (has user session).
+ * Path includes userId for ownership verification in storage policies.
+ */
+export async function uploadFile(
+  file: File,
+  folder: string,
+  userId: string
+): Promise<{ url: string; name: string; size: number } | null> {
   const ext = file.name.split('.').pop() || 'png';
-  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const path = `${userId}/${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-  const { error } = await supabaseData.storage.from(BUCKET).upload(path, file, {
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
     contentType: file.type,
     upsert: false,
   });
@@ -16,7 +24,7 @@ export async function uploadFile(file: File, folder: string): Promise<{ url: str
     return null;
   }
 
-  const { data } = supabaseData.storage.from(BUCKET).getPublicUrl(path);
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
   return { url: data.publicUrl, name: file.name, size: file.size };
 }
 
