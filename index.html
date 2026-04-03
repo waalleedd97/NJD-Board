@@ -68,13 +68,13 @@
         justify-content: center;
         transition: opacity 0.25s ease;
       }
-      .njd-loader .logo-img img {
-        width: 100px;
-        height: auto;
-        filter: brightness(0);
-      }
-      .dark .njd-loader .logo-img img {
-        filter: brightness(0) invert(1);
+      .njd-loader .logo-img .njd-text {
+        font-family: 'Arial Black', 'Helvetica Neue', sans-serif;
+        font-size: 42px;
+        font-weight: 900;
+        letter-spacing: 6px;
+        color: var(--njd-loader-icon);
+        user-select: none;
       }
       .njd-loader .car-svg svg {
         width: 100px;
@@ -169,7 +169,7 @@
       <div class="loader-content">
         <div class="morph-container">
           <div class="logo-img">
-            <img src="https://njd-services.net/images/logo.webp" alt="NJD" />
+            <span class="njd-text">NJD</span>
           </div>
           <div class="car-svg">
             <svg viewBox="0 0 120 70" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
