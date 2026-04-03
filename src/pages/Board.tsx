@@ -51,11 +51,11 @@ const PRIORITY_COLORS: Record<string, string> = {
   critical: '#EF4444', high: '#F97316', medium: '#EAB308', low: '#22C55E',
 };
 
-const COLUMN_STYLES: Record<string, { border: string; headerBg: string; text: string; countBg: string }> = {
-  'todo':        { border: 'border-gray-400',  headerBg: 'bg-gray-500/10 dark:bg-gray-400/10',  text: 'text-gray-500 dark:text-gray-400',  countBg: 'bg-gray-500/15 dark:bg-gray-400/15' },
-  'in-progress': { border: 'border-blue-500',  headerBg: 'bg-blue-500/10 dark:bg-blue-400/10',  text: 'text-blue-600 dark:text-blue-400',  countBg: 'bg-blue-500/15 dark:bg-blue-400/15' },
-  'review':      { border: 'border-amber-500', headerBg: 'bg-amber-500/10 dark:bg-amber-400/10', text: 'text-amber-600 dark:text-amber-400', countBg: 'bg-amber-500/15 dark:bg-amber-400/15' },
-  'done':        { border: 'border-emerald-500', headerBg: 'bg-emerald-500/10 dark:bg-emerald-400/10', text: 'text-emerald-600 dark:text-emerald-400', countBg: 'bg-emerald-500/15 dark:bg-emerald-400/15' },
+const COLUMN_STYLES: Record<string, { border: string; headerBg: string; text: string; countBg: string; wellBg: string; wellBorder: string }> = {
+  'todo':        { border: 'border-gray-400',    headerBg: 'bg-gray-500/10 dark:bg-gray-400/10',    text: 'text-gray-500 dark:text-gray-400',    countBg: 'bg-gray-500/15 dark:bg-gray-400/15',    wellBg: 'bg-gray-100/60 dark:bg-gray-500/[0.06]',    wellBorder: 'border-gray-300/40 dark:border-gray-500/10' },
+  'in-progress': { border: 'border-blue-500',    headerBg: 'bg-blue-500/10 dark:bg-blue-400/10',    text: 'text-blue-600 dark:text-blue-400',    countBg: 'bg-blue-500/15 dark:bg-blue-400/15',    wellBg: 'bg-blue-50/60 dark:bg-blue-500/[0.06]',      wellBorder: 'border-blue-200/40 dark:border-blue-500/10' },
+  'review':      { border: 'border-amber-500',   headerBg: 'bg-amber-500/10 dark:bg-amber-400/10',  text: 'text-amber-600 dark:text-amber-400',  countBg: 'bg-amber-500/15 dark:bg-amber-400/15',  wellBg: 'bg-amber-50/60 dark:bg-amber-500/[0.06]',    wellBorder: 'border-amber-200/40 dark:border-amber-500/10' },
+  'done':        { border: 'border-emerald-500', headerBg: 'bg-emerald-500/10 dark:bg-emerald-400/10', text: 'text-emerald-600 dark:text-emerald-400', countBg: 'bg-emerald-500/15 dark:bg-emerald-400/15', wellBg: 'bg-emerald-50/60 dark:bg-emerald-500/[0.06]', wellBorder: 'border-emerald-200/40 dark:border-emerald-500/10' },
 };
 
 // ── Priority config (for side panel) ──
@@ -246,7 +246,7 @@ export function Board() {
                   </div>
                 </div>
 
-                <div className="space-y-3 min-h-[200px] p-2 rounded-2xl bg-white/50 dark:bg-white/[0.04] border border-gray-200/30 dark:border-white/[0.06]">
+                <div className={`space-y-3 min-h-[200px] p-2 rounded-2xl border ${cs.wellBg} ${cs.wellBorder}`}>
                   {columnTasks.length === 0 ? (
                     <div className="flex items-center justify-center h-[200px] text-xs text-muted dark:text-gray-500">
                       {t('board.noTasks')}
