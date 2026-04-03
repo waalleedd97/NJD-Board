@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,6 +15,8 @@ import {
   Zap,
   MessageSquare,
   Check,
+  Paperclip,
+  ImageIcon,
 } from 'lucide-react';
 
 import { FilterBar } from '../components/ui/FilterBar';
@@ -22,6 +24,7 @@ import { boardColumns } from '../data/mockData';
 import { useDataStore } from '../store/useDataStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { supabaseData } from '../lib/supabase';
+import { uploadFile, isImageFile } from '../lib/upload';
 import type { Task, TaskStatus } from '../data/mockData';
 
 // ── Category color + emoji maps ──
@@ -358,24 +361,74 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
   const [descDraft, setDescDraft] = useState(task.description);
 
   // Comments
-  const [comments, setComments] = useState<{ id: string; user_name: string; content: string; created_at: string }[]>([]);
+  const [comments, setComments] = useState<{ id: string; user_name: string; content: string; image_url?: string; created_at: string }[]>([]);
   const [commentText, setCommentText] = useState('');
+  const [commentImage, setCommentImage] = useState<File | null>(null);
+  const [commentImagePreview, setCommentImagePreview] = useState('');
   const [sendingComment, setSendingComment] = useState(false);
   const currentUser = useAuthStore((s) => s.user);
+  const commentFileRef = useRef<HTMLInputElement>(null);
+
+  // Attachments
+  const [attachments, setAttachments] = useState<{ id: string; file_name: string; file_url: string; created_at: string }[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const attachFileRef = useRef<HTMLInputElement>(null);
+  const [lightboxUrl, setLightboxUrl] = useState('');
 
   useEffect(() => {
     supabaseData.from('comments').select('*').eq('task_id', task.id).order('created_at', { ascending: true })
       .then(({ data }) => { if (data) setComments(data as typeof comments); });
+    supabaseData.from('attachments' as never).select('*').eq('task_id', task.id).order('created_at', { ascending: true })
+      .then(({ data }: { data: typeof attachments | null }) => { if (data) setAttachments(data); });
   }, [task.id]);
 
   const handleAddComment = async () => {
-    if (!commentText.trim()) return;
+    if (!commentText.trim() && !commentImage) return;
     setSendingComment(true);
     const userName = currentUser ? (isAr ? currentUser.nameAr : currentUser.name) : 'Unknown';
-    const { data } = await supabaseData.from('comments').insert({ task_id: task.id, user_name: userName, content: commentText.trim() }).select('*');
+    let imageUrl: string | null = null;
+    if (commentImage) {
+      const result = await uploadFile(commentImage, `comments/${task.id}`);
+      if (result) imageUrl = result.url;
+    }
+    const { data } = await supabaseData.from('comments').insert({
+      task_id: task.id, user_name: userName, content: commentText.trim(), ...(imageUrl ? { image_url: imageUrl } : {}),
+    }).select('*');
     if (data?.[0]) setComments((prev) => [...prev, data[0] as typeof comments[0]]);
     setCommentText('');
+    setCommentImage(null);
+    setCommentImagePreview('');
     setSendingComment(false);
+  };
+
+  const handleCommentImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && isImageFile(file)) {
+      setCommentImage(file);
+      setCommentImagePreview(URL.createObjectURL(file));
+    }
+    e.target.value = '';
+  };
+
+  const handleAttachmentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !isImageFile(file)) return;
+    e.target.value = '';
+    setUploading(true);
+    const userName = currentUser ? (isAr ? currentUser.nameAr : currentUser.name) : 'Unknown';
+    const result = await uploadFile(file, `tasks/${task.id}`);
+    if (result) {
+      const { data } = await supabaseData.from('attachments' as never).insert({
+        task_id: task.id, file_name: result.name, file_url: result.url, file_size: result.size, uploaded_by: userName,
+      } as never).select('*');
+      if (data?.[0]) setAttachments((prev) => [...prev, data[0] as typeof attachments[0]]);
+    }
+    setUploading(false);
+  };
+
+  const handleDeleteAttachment = async (id: string) => {
+    await supabaseData.from('attachments' as never).delete().eq('id', id);
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
   };
 
   const saveTitle = async () => {
@@ -473,6 +526,29 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
             )}
           </div>
 
+          {/* Attachments */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className={fieldLabel}><Paperclip size={10} className="inline mb-0.5" /> {isAr ? 'المرفقات' : 'Attachments'} {attachments.length > 0 && <span className="text-muted">({attachments.length})</span>}</p>
+              <button onClick={() => attachFileRef.current?.click()} disabled={uploading} className="text-xs text-primary hover:text-primary-dark transition-colors flex items-center gap-1">
+                <ImageIcon size={12} />
+                {uploading ? (isAr ? 'جاري الرفع...' : 'Uploading...') : (isAr ? 'إضافة صورة' : 'Add image')}
+              </button>
+              <input ref={attachFileRef} type="file" accept="image/*" className="hidden" onChange={handleAttachmentUpload} />
+            </div>
+            {attachments.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mb-2">
+                {attachments.map((a) => (
+                  <div key={a.id} className="group relative rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 aspect-square">
+                    <img src={a.file_url} alt={a.file_name} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(a.file_url)} />
+                    <button onClick={() => handleDeleteAttachment(a.id)} className="absolute top-1 end-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={10} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {attachments.length === 0 && <p className="text-xs text-muted dark:text-gray-500 mb-2">{isAr ? 'لا توجد مرفقات' : 'No attachments'}</p>}
+          </div>
+
           {/* Comments */}
           <div>
             <p className={fieldLabel + ' mb-2'}><MessageSquare size={10} className="inline mb-0.5" /> {isAr ? 'التعليقات' : 'Comments'} {comments.length > 0 && <span className="text-muted">({comments.length})</span>}</p>
@@ -483,15 +559,37 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
                     <span className="text-xs font-semibold text-ink dark:text-white">{c.user_name}</span>
                     <span className="text-[10px] text-muted dark:text-gray-500">{new Date(c.created_at).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                  <p className="text-sm text-ink dark:text-gray-300 whitespace-pre-wrap">{c.content}</p>
+                  {c.content && <p className="text-sm text-ink dark:text-gray-300 whitespace-pre-wrap">{c.content}</p>}
+                  {c.image_url && (
+                    <img src={c.image_url} alt="" className="mt-2 rounded-lg max-h-48 object-cover cursor-pointer border border-gray-200 dark:border-white/10" onClick={() => setLightboxUrl(c.image_url!)} />
+                  )}
                 </div>
               ))}
-              <div className="flex gap-2">
-                <input value={commentText} onChange={(e) => setCommentText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddComment(); } }} placeholder={isAr ? 'أضف تعليقاً...' : 'Add a comment...'} className="flex-1 h-9 px-3 rounded-lg text-sm bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-ink dark:text-white placeholder:text-muted outline-none focus:border-primary" />
-                <button onClick={handleAddComment} disabled={sendingComment || !commentText.trim()} className="px-3 h-9 rounded-lg text-xs font-medium bg-primary text-white hover:bg-primary-dark disabled:opacity-50 transition-colors">{isAr ? 'إرسال' : 'Send'}</button>
+              {/* Comment input */}
+              <div className="space-y-2">
+                {commentImagePreview && (
+                  <div className="relative inline-block">
+                    <img src={commentImagePreview} alt="" className="h-20 rounded-lg border border-gray-200 dark:border-white/10" />
+                    <button onClick={() => { setCommentImage(null); setCommentImagePreview(''); }} className="absolute -top-1.5 -end-1.5 p-0.5 rounded-full bg-red-500 text-white"><X size={10} /></button>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <input value={commentText} onChange={(e) => setCommentText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddComment(); } }} placeholder={isAr ? 'أضف تعليقاً...' : 'Add a comment...'} className="flex-1 h-9 px-3 rounded-lg text-sm bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-ink dark:text-white placeholder:text-muted outline-none focus:border-primary" />
+                  <button onClick={() => commentFileRef.current?.click()} className="p-2 h-9 rounded-lg text-muted hover:text-primary hover:bg-primary/10 transition-colors" title={isAr ? 'إرفاق صورة' : 'Attach image'}><ImageIcon size={16} /></button>
+                  <input ref={commentFileRef} type="file" accept="image/*" className="hidden" onChange={handleCommentImageSelect} />
+                  <button onClick={handleAddComment} disabled={sendingComment || (!commentText.trim() && !commentImage)} className="px-3 h-9 rounded-lg text-xs font-medium bg-primary text-white hover:bg-primary-dark disabled:opacity-50 transition-colors">{isAr ? 'إرسال' : 'Send'}</button>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Image lightbox */}
+          {lightboxUrl && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 cursor-pointer" onClick={() => setLightboxUrl('')}>
+              <img src={lightboxUrl} alt="" className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg" />
+              <button className="absolute top-4 end-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"><X size={20} /></button>
+            </div>
+          )}
 
           {/* Activity */}
           <div>
