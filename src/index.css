@@ -16,6 +16,10 @@
   --color-surface: #1A1827;
   --color-night-accent: #A78BFA;
   --color-night-border: #2D2B3D;
+  --color-board-bg: #EFF2F7;
+  --color-board-bg-dark: #0B1222;
+  --color-board-panel: #F8F9FC;
+  --color-board-panel-dark: #101828;
 
   --font-sans: 'Inter', 'Tajawal', system-ui, sans-serif;
   --font-arabic: 'Tajawal', 'Inter', system-ui, sans-serif;

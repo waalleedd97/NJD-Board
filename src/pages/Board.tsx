@@ -164,7 +164,7 @@ export function Board() {
   const panelOpen = !!selectedTask;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[var(--color-board-bg)] dark:bg-[var(--color-board-bg-dark)]">
       {/* Board area — adds padding when panel open */}
       <div className={`overflow-hidden ${panelOpen ? (isAr ? 'pr-0 pl-[44%]' : 'pl-0 pr-[44%]') : ''}`} onClick={() => { if (panelOpen) setSelectedTask(null); }}>
       <div className="p-6 space-y-6">
@@ -246,7 +246,7 @@ export function Board() {
                   </div>
                 </div>
 
-                <div className="space-y-3 min-h-[200px] p-2 rounded-2xl bg-gray-50/50 dark:bg-white/[0.02] border border-gray-200/30 dark:border-white/5">
+                <div className="space-y-3 min-h-[200px] p-2 rounded-2xl bg-white/50 dark:bg-white/[0.04] border border-gray-200/30 dark:border-white/[0.06]">
                   {columnTasks.length === 0 ? (
                     <div className="flex items-center justify-center h-[200px] text-xs text-muted dark:text-gray-500">
                       {t('board.noTasks')}
@@ -298,7 +298,7 @@ function TaskCard({ task, isAr, delay, onClick }: { task: Task; isAr: boolean; d
 
   return (
     <motion.div
-      className="group cursor-pointer rounded-xl p-3.5 bg-white dark:bg-surface border border-gray-200/50 dark:border-white/5 shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-night-accent/30 transition-all duration-200"
+      className="group cursor-pointer rounded-xl p-3.5 bg-white dark:bg-[#151D2E] border border-gray-200/50 dark:border-white/[0.08] shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-night-accent/30 transition-all duration-200"
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay }}
       onClick={onClick} whileHover={{ y: -2 }}
     >
@@ -402,7 +402,7 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
 
   return (
       <motion.div
-        className={`fixed top-[var(--njd-navbar-height,64px)] ${isAr ? 'left-0' : 'right-0'} w-[42%] min-w-[380px] max-w-xl flex flex-col bg-white dark:bg-surface ${isAr ? 'border-r-2 border-r-gray-300 dark:border-r-white/10' : 'border-l-2 border-l-gray-300 dark:border-l-white/10'} overflow-hidden z-30`}
+        className={`fixed top-[var(--njd-navbar-height,64px)] ${isAr ? 'left-0' : 'right-0'} w-[42%] min-w-[380px] max-w-xl flex flex-col bg-[var(--color-board-panel)] dark:bg-[var(--color-board-panel-dark)] ${isAr ? 'border-r-2 border-r-gray-300 dark:border-r-white/10' : 'border-l-2 border-l-gray-300 dark:border-l-white/10'} overflow-hidden z-30`}
         style={{ height: 'calc(100vh - var(--njd-navbar-height, 64px))', boxShadow: isAr ? '6px 0 20px rgba(0,0,0,0.15)' : '-6px 0 20px rgba(0,0,0,0.15)' }}
         initial={{ x: isAr ? '-100%' : '100%', opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -487,7 +487,7 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
                 </div>
               ))}
               <div className="flex gap-2">
-                <input value={commentText} onChange={(e) => setCommentText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddComment(); } }} placeholder={isAr ? 'أضف تعليقاً...' : 'Add a comment...'} className="flex-1 h-9 px-3 rounded-lg text-sm bg-white dark:bg-surface border border-gray-200 dark:border-white/10 text-ink dark:text-white placeholder:text-muted outline-none focus:border-primary" />
+                <input value={commentText} onChange={(e) => setCommentText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAddComment(); } }} placeholder={isAr ? 'أضف تعليقاً...' : 'Add a comment...'} className="flex-1 h-9 px-3 rounded-lg text-sm bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-ink dark:text-white placeholder:text-muted outline-none focus:border-primary" />
                 <button onClick={handleAddComment} disabled={sendingComment || !commentText.trim()} className="px-3 h-9 rounded-lg text-xs font-medium bg-primary text-white hover:bg-primary-dark disabled:opacity-50 transition-colors">{isAr ? 'إرسال' : 'Send'}</button>
               </div>
             </div>
