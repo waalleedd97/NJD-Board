@@ -234,22 +234,22 @@ export function Board() {
             return (
               <motion.div
                 key={column.id}
+                className={`rounded-2xl border overflow-hidden ${cs.wellBg} ${cs.wellBorder}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: colIdx * 0.08 }}
               >
-                <div className="mb-3">
-                  <div className={`flex items-center justify-between px-3 py-2 rounded-xl border-t-[3px] ${cs.border} ${cs.headerBg}`}>
-                    <span className={`text-sm font-bold ${cs.text}`}>
-                      {isAr ? column.titleAr : column.titleEn}
-                    </span>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cs.countBg} ${cs.text}`}>
-                      {columnTasks.length}
-                    </span>
-                  </div>
+                {/* Column header — connected to body */}
+                <div className={`flex items-center justify-between px-3 py-2 border-t-[3px] ${cs.border} ${cs.headerBg}`}>
+                  <span className={`text-sm font-bold ${cs.text}`}>
+                    {isAr ? column.titleAr : column.titleEn}
+                  </span>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cs.countBg} ${cs.text}`}>
+                    {columnTasks.length}
+                  </span>
                 </div>
 
-                <div className={`space-y-3 min-h-[200px] p-2 rounded-2xl border ${cs.wellBg} ${cs.wellBorder}`}>
+                <div className="space-y-3 min-h-[200px] p-2">
                   {columnTasks.length === 0 ? (
                     <div className="flex items-center justify-center h-[200px] text-xs text-muted dark:text-gray-500">
                       {t('board.noTasks')}
