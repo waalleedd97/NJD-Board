@@ -54,11 +54,11 @@ const PRIORITY_COLORS: Record<string, string> = {
   critical: '#EF4444', high: '#F97316', medium: '#EAB308', low: '#22C55E',
 };
 
-const COLUMN_STYLES: Record<string, { border: string; headerBg: string; text: string; countBg: string; wellBg: string; wellBorder: string }> = {
-  'todo':        { border: 'border-gray-400',    headerBg: 'bg-gray-500/10 dark:bg-gray-400/10',    text: 'text-gray-500 dark:text-gray-400',    countBg: 'bg-gray-500/15 dark:bg-gray-400/15',    wellBg: 'bg-gray-100/60 dark:bg-gray-500/[0.06]',    wellBorder: 'border-gray-300/40 dark:border-gray-500/10' },
-  'in-progress': { border: 'border-blue-500',    headerBg: 'bg-blue-500/10 dark:bg-blue-400/10',    text: 'text-blue-600 dark:text-blue-400',    countBg: 'bg-blue-500/15 dark:bg-blue-400/15',    wellBg: 'bg-blue-50/60 dark:bg-blue-500/[0.06]',      wellBorder: 'border-blue-200/40 dark:border-blue-500/10' },
-  'review':      { border: 'border-amber-500',   headerBg: 'bg-amber-500/10 dark:bg-amber-400/10',  text: 'text-amber-600 dark:text-amber-400',  countBg: 'bg-amber-500/15 dark:bg-amber-400/15',  wellBg: 'bg-amber-50/60 dark:bg-amber-500/[0.06]',    wellBorder: 'border-amber-200/40 dark:border-amber-500/10' },
-  'done':        { border: 'border-emerald-500', headerBg: 'bg-emerald-500/10 dark:bg-emerald-400/10', text: 'text-emerald-600 dark:text-emerald-400', countBg: 'bg-emerald-500/15 dark:bg-emerald-400/15', wellBg: 'bg-emerald-50/60 dark:bg-emerald-500/[0.06]', wellBorder: 'border-emerald-200/40 dark:border-emerald-500/10' },
+const COLUMN_STYLES: Record<string, { border: string; headerBg: string; text: string; countBg: string; wellBg: string; wellBorder: string; cardBg: string; cardBorder: string }> = {
+  'todo':        { border: 'border-gray-400',    headerBg: 'bg-gray-500/10 dark:bg-gray-400/10',    text: 'text-gray-500 dark:text-gray-400',    countBg: 'bg-gray-500/15 dark:bg-gray-400/15',    wellBg: 'bg-gray-100/60 dark:bg-gray-500/[0.06]',    wellBorder: 'border-gray-300/40 dark:border-gray-500/10',    cardBg: 'bg-white dark:bg-gray-800/50',              cardBorder: 'border-gray-200/60 dark:border-gray-600/20' },
+  'in-progress': { border: 'border-blue-500',    headerBg: 'bg-blue-500/10 dark:bg-blue-400/10',    text: 'text-blue-600 dark:text-blue-400',    countBg: 'bg-blue-500/15 dark:bg-blue-400/15',    wellBg: 'bg-blue-50/60 dark:bg-blue-500/[0.06]',      wellBorder: 'border-blue-200/40 dark:border-blue-500/10',    cardBg: 'bg-blue-50/80 dark:bg-blue-950/40',         cardBorder: 'border-blue-200/60 dark:border-blue-500/15' },
+  'review':      { border: 'border-amber-500',   headerBg: 'bg-amber-500/10 dark:bg-amber-400/10',  text: 'text-amber-600 dark:text-amber-400',  countBg: 'bg-amber-500/15 dark:bg-amber-400/15',  wellBg: 'bg-amber-50/60 dark:bg-amber-500/[0.06]',    wellBorder: 'border-amber-200/40 dark:border-amber-500/10',  cardBg: 'bg-amber-50/80 dark:bg-amber-950/40',       cardBorder: 'border-amber-200/60 dark:border-amber-500/15' },
+  'done':        { border: 'border-emerald-500', headerBg: 'bg-emerald-500/10 dark:bg-emerald-400/10', text: 'text-emerald-600 dark:text-emerald-400', countBg: 'bg-emerald-500/15 dark:bg-emerald-400/15', wellBg: 'bg-emerald-50/60 dark:bg-emerald-500/[0.06]', wellBorder: 'border-emerald-200/40 dark:border-emerald-500/10', cardBg: 'bg-emerald-50/80 dark:bg-emerald-950/40', cardBorder: 'border-emerald-200/60 dark:border-emerald-500/15' },
 };
 
 // ── Priority config (for side panel) ──
@@ -82,6 +82,20 @@ export function Board() {
   const { tasks, projects, sprints, teamMembers, addTask, updateTask, deleteTask } = useDataStore();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [taskThumbnails, setTaskThumbnails] = useState<Record<string, string>>({});
+
+  // Fetch first attachment image per task for card thumbnails
+  useEffect(() => {
+    supabaseData.from('attachments' as never).select('task_id, file_url').order('created_at', { ascending: true })
+      .then(({ data }: { data: { task_id: string; file_url: string }[] | null }) => {
+        if (!data) return;
+        const map: Record<string, string> = {};
+        for (const row of data) {
+          if (!map[row.task_id]) map[row.task_id] = row.file_url;
+        }
+        setTaskThumbnails(map);
+      });
+  }, []);
 
   const handleDeleteTask = async (taskId: string) => {
     if (!confirm(isAr ? 'حذف هذه المهمة؟' : 'Delete this task?')) return;
@@ -262,6 +276,8 @@ export function Board() {
                         isAr={isAr}
                         delay={colIdx * 0.08 + taskIdx * 0.05}
                         onClick={() => setSelectedTask(task)}
+                        cardStyle={cs}
+                        thumbnail={taskThumbnails[task.id]}
                       />
                     ))
                   )}
@@ -291,7 +307,11 @@ export function Board() {
 
 // ── Task Card ──
 
-function TaskCard({ task, isAr, delay, onClick }: { task: Task; isAr: boolean; delay: number; onClick: () => void }) {
+function TaskCard({ task, isAr, delay, onClick, cardStyle, thumbnail }: {
+  task: Task; isAr: boolean; delay: number; onClick: () => void;
+  cardStyle: { cardBg: string; cardBorder: string };
+  thumbnail?: string;
+}) {
   const { getTeamMember, getProject } = useDataStore();
   const assignee = getTeamMember(task.assigneeId);
   const project = getProject(task.projectId);
@@ -301,44 +321,53 @@ function TaskCard({ task, isAr, delay, onClick }: { task: Task; isAr: boolean; d
 
   return (
     <motion.div
-      className="group cursor-pointer rounded-xl p-3.5 bg-white dark:bg-[#151D2E] border border-gray-200/50 dark:border-white/[0.08] shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-night-accent/30 transition-all duration-200"
+      className={`group cursor-pointer rounded-xl overflow-hidden border shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-night-accent/30 transition-all duration-200 ${cardStyle.cardBg} ${cardStyle.cardBorder}`}
       initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay }}
       onClick={onClick} whileHover={{ y: -2 }}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className="w-[10px] h-[10px] rounded-full shrink-0" style={{ backgroundColor: PRIORITY_COLORS[task.priority] ?? '#EAB308' }} title={task.priority} />
-        {project && (
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ backgroundColor: project.color + '18', color: project.color }}>
-            {isAr ? project.nameAr : project.name}
-          </span>
-        )}
-      </div>
-
-      <h4 className="text-sm font-semibold text-ink dark:text-white mb-2 line-clamp-2">{isAr ? task.titleAr : task.title}</h4>
-
-      <div className="flex flex-wrap gap-1 mb-3">
-        {(isAr ? task.tagsAr : task.tags).slice(0, 2).map((tag, i) => {
-          const color = i === 0 ? getCategoryColor(tag) : undefined;
-          const icon = i === 0 ? getCategoryIcon(tag) : '';
-          return (
-            <span key={tag} className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={color ? { backgroundColor: color + '18', color } : undefined}>
-              {icon ? `${icon} ` : ''}{tag}
-            </span>
-          );
-        })}
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          {assignee && <span className="text-sm" title={isAr ? assignee.nameAr : assignee.name}>{assignee.avatar}</span>}
-          {task.storyPoints > 0 && <span className="text-[10px] font-bold text-muted dark:text-gray-400 bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">{task.storyPoints}pt</span>}
+      {/* Attachment thumbnail */}
+      {thumbnail && (
+        <div className="w-full h-28 overflow-hidden">
+          <img src={thumbnail} alt="" className="w-full h-full object-cover" />
         </div>
-        {task.dueDate && (
-          <div className="flex items-center gap-1">
-            <Calendar size={11} className={`${isOverdue() ? 'text-red-500' : isDueSoon() ? 'text-amber-500' : 'text-muted dark:text-gray-500'}`} />
-            <span className={`text-[10px] ${isOverdue() ? 'text-red-500 font-medium' : isDueSoon() ? 'text-amber-500' : 'text-muted dark:text-gray-500'}`}>{task.dueDate.slice(5)}</span>
+      )}
+
+      <div className="p-3.5">
+        <div className="flex items-center justify-between mb-2">
+          <span className="w-[10px] h-[10px] rounded-full shrink-0" style={{ backgroundColor: PRIORITY_COLORS[task.priority] ?? '#EAB308' }} title={task.priority} />
+          {project && (
+            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ backgroundColor: project.color + '18', color: project.color }}>
+              {isAr ? project.nameAr : project.name}
+            </span>
+          )}
+        </div>
+
+        <h4 className="text-sm font-semibold text-ink dark:text-white mb-2 line-clamp-2">{isAr ? task.titleAr : task.title}</h4>
+
+        <div className="flex flex-wrap gap-1 mb-3">
+          {(isAr ? task.tagsAr : task.tags).slice(0, 2).map((tag, i) => {
+            const color = i === 0 ? getCategoryColor(tag) : undefined;
+            const icon = i === 0 ? getCategoryIcon(tag) : '';
+            return (
+              <span key={tag} className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={color ? { backgroundColor: color + '18', color } : undefined}>
+                {icon ? `${icon} ` : ''}{tag}
+              </span>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            {assignee && <span className="text-sm" title={isAr ? assignee.nameAr : assignee.name}>{assignee.avatar}</span>}
+            {task.storyPoints > 0 && <span className="text-[10px] font-bold text-muted dark:text-gray-400 bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">{task.storyPoints}pt</span>}
           </div>
-        )}
+          {task.dueDate && (
+            <div className="flex items-center gap-1">
+              <Calendar size={11} className={`${isOverdue() ? 'text-red-500' : isDueSoon() ? 'text-amber-500' : 'text-muted dark:text-gray-500'}`} />
+              <span className={`text-[10px] ${isOverdue() ? 'text-red-500 font-medium' : isDueSoon() ? 'text-amber-500' : 'text-muted dark:text-gray-500'}`}>{task.dueDate.slice(5)}</span>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
