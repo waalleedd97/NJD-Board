@@ -330,8 +330,8 @@ function TaskCard({ task, isAr, delay, onClick, cardStyle, thumbnail }: {
     >
       {/* Attachment thumbnail */}
       {thumbnail && (
-        <div className="w-full h-28 overflow-hidden">
-          <img src={thumbnail} alt="" className="w-full h-full object-cover" />
+        <div className="w-full h-28 overflow-hidden bg-gray-100 dark:bg-white/5">
+          <img src={thumbnail} alt="" className="w-full h-full object-cover opacity-0 transition-opacity duration-300" onLoad={(e) => { e.currentTarget.style.opacity = '1'; }} />
         </div>
       )}
 
@@ -577,8 +577,8 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
             {attachments.length > 0 && (
               <div className="grid grid-cols-3 gap-2 mb-2">
                 {attachments.map((a) => (
-                  <div key={a.id} className="group relative rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 aspect-square">
-                    <img src={a.file_url} alt={a.file_name} className="w-full h-full object-cover cursor-pointer" onClick={() => setLightboxUrl(a.file_url)} />
+                  <div key={a.id} className="group relative rounded-lg overflow-hidden border border-gray-200 dark:border-white/10 aspect-square bg-gray-100 dark:bg-white/5">
+                    <img src={a.file_url} alt={a.file_name} className="w-full h-full object-cover cursor-pointer opacity-0 transition-opacity duration-300" onLoad={(e) => { e.currentTarget.style.opacity = '1'; }} onClick={() => setLightboxUrl(a.file_url)} />
                     {canDeleteAttachment(a) && <button onClick={() => handleDeleteAttachment(a.id)} className="absolute top-1 end-1 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={10} /></button>}
                   </div>
                 ))}
@@ -599,7 +599,7 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
                   </div>
                   {c.content && <p className="text-sm text-ink dark:text-gray-300 whitespace-pre-wrap">{c.content}</p>}
                   {c.image_url && (
-                    <img src={c.image_url} alt="" className="mt-2 rounded-lg max-h-48 object-cover cursor-pointer border border-gray-200 dark:border-white/10" onClick={() => setLightboxUrl(c.image_url!)} />
+                    <img src={c.image_url} alt="" className="mt-2 rounded-lg max-h-48 object-cover cursor-pointer border border-gray-200 dark:border-white/10 opacity-0 transition-opacity duration-300" onLoad={(e) => { e.currentTarget.style.opacity = '1'; }} onClick={() => setLightboxUrl(c.image_url!)} />
                   )}
                 </div>
               ))}
@@ -624,7 +624,7 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
           {/* Image lightbox */}
           {lightboxUrl && (
             <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 cursor-pointer" onClick={() => setLightboxUrl('')}>
-              <img src={lightboxUrl} alt="" className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg" />
+              <img src={lightboxUrl} alt="" className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg opacity-0 transition-opacity duration-300" onLoad={(e) => { e.currentTarget.style.opacity = '1'; }} />
               <button className="absolute top-4 end-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"><X size={20} /></button>
             </div>
           )}
