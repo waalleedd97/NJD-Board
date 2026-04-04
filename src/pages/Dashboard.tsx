@@ -17,7 +17,7 @@ export function Dashboard() {
   const isAr = i18n.language === 'ar';
   const { user } = useAuthStore();
   const isAdmin = useIsAdmin();
-  const { projects, tasks, activities, teamMembers, sprints } = useDataStore();
+  const { projects, tasks, activities, teamMembers, sprints, isLoading } = useDataStore();
   const navigate = useNavigate();
   const [fabOpen, setFabOpen] = useState(false);
 
@@ -58,6 +58,24 @@ export function Dashboard() {
   const displayName = user
     ? (isAr ? user.nameAr : user.name)
     : 'NJD Games';
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-6 space-y-6 max-w-[1400px]">
+        {/* Skeleton welcome banner */}
+        <div className="rounded-[24px] h-[180px] bg-gradient-to-br from-primary/20 via-primary-dark/10 to-primary/5 animate-pulse" />
+        {/* Skeleton KPI cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1,2,3,4].map((i) => <div key={i} className="rounded-[20px] h-[120px] bg-gray-200/50 dark:bg-white/5 animate-pulse" />)}
+        </div>
+        {/* Skeleton sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-2 rounded-[20px] h-[200px] bg-gray-200/50 dark:bg-white/5 animate-pulse" />
+          <div className="lg:col-span-3 rounded-[20px] h-[200px] bg-gray-200/50 dark:bg-white/5 animate-pulse" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
