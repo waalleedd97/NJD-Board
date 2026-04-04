@@ -8,6 +8,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { FilterBar } from '../components/ui/FilterBar';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useDataStore } from '../store/useDataStore';
+import { PageSkeleton } from '../components/ui/PageSkeleton';
 import type { DesignItemType } from '../data/mockData';
 
 const typeConfig: Record<DesignItemType, { labelEn: string; labelAr: string; color: string }> = {
@@ -25,7 +26,7 @@ export function DesignItems() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const { designItems, projects, addDesignItem, updateDesignItem, deleteDesignItem } = useDataStore();
+  const { designItems, projects, addDesignItem, updateDesignItem, deleteDesignItem, isLoading } = useDataStore();
   const [editingItem, setEditingItem] = useState<typeof designItems[0] | null>(null);
   const [projectFilter, setProjectFilter] = useState('all');
   const [showCreate, setShowCreate] = useState(false);
@@ -84,6 +85,8 @@ export function DesignItems() {
     inReview: designItems.filter((d) => d.status === 'in-review').length,
     draft: designItems.filter((d) => d.status === 'draft').length,
   }), []);
+
+  if (isLoading) return <PageSkeleton variant="grid" />;
 
   return (
     <div className="min-h-screen">

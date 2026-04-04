@@ -25,6 +25,7 @@ import { useDataStore } from '../store/useDataStore';
 import { useAuthStore, useIsAdmin } from '../store/useAuthStore';
 import { supabaseData } from '../lib/supabase';
 import { uploadFile, isImageFile } from '../lib/upload';
+import { PageSkeleton } from '../components/ui/PageSkeleton';
 import type { Task, TaskStatus } from '../data/mockData';
 
 // ── Category color + emoji maps ──
@@ -79,7 +80,7 @@ export function Board() {
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const { tasks, projects, sprints, teamMembers, addTask, updateTask, deleteTask } = useDataStore();
+  const { tasks, projects, sprints, teamMembers, addTask, updateTask, deleteTask, isLoading } = useDataStore();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [taskThumbnails, setTaskThumbnails] = useState<Record<string, string>>({});
@@ -179,6 +180,8 @@ export function Board() {
   }, [selectedTask]);
 
   const panelOpen = !!selectedTask;
+
+  if (isLoading) return <PageSkeleton variant="board" />;
 
   return (
     <div className="min-h-screen bg-[var(--color-board-bg)] dark:bg-[var(--color-board-bg-dark)]">

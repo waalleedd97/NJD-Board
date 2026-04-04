@@ -19,6 +19,7 @@ import { FilterBar } from '../components/ui/FilterBar';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useAuthStore, useIsAdmin } from '../store/useAuthStore';
 import { useDataStore } from '../store/useDataStore';
+import { PageSkeleton } from '../components/ui/PageSkeleton';
 import type { TeamMember } from '../data/mockData';
 
 const statusDot: Record<string, string> = {
@@ -37,7 +38,7 @@ export function Team() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
   useAuthStore();
-  const { teamMembers } = useDataStore();
+  const { teamMembers, isLoading } = useDataStore();
   const isAdmin = useIsAdmin();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -66,6 +67,8 @@ export function Team() {
   const avgWorkload = teamMembers.length > 0
     ? Math.round(teamMembers.reduce((sum, m) => sum + m.workload, 0) / teamMembers.length)
     : 0;
+
+  if (isLoading) return <PageSkeleton variant="grid" />;
 
   return (
     <div className="min-h-screen">

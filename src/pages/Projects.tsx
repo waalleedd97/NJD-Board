@@ -11,6 +11,7 @@ import { FilterBar } from '../components/ui/FilterBar';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useDataStore } from '../store/useDataStore';
 import { useIsAdmin } from '../store/useAuthStore';
+import { PageSkeleton } from '../components/ui/PageSkeleton';
 import type { Project } from '../data/mockData';
 import { Link } from 'react-router-dom';
 
@@ -24,7 +25,7 @@ export function Projects() {
   const isAr = i18n.language === 'ar';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const { projects, teamMembers, addProject, updateProject, deleteProject } = useDataStore();
+  const { projects, teamMembers, addProject, updateProject, deleteProject, isLoading } = useDataStore();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const isAdmin = useIsAdmin();
   const [showCreate, setShowCreate] = useState(false);
@@ -61,6 +62,8 @@ export function Projects() {
     const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  if (isLoading) return <PageSkeleton />;
 
   return (
     <div className="min-h-screen">

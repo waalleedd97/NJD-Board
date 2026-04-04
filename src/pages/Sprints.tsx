@@ -9,6 +9,7 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { EmptyState } from '../components/ui/EmptyState';
 import { useDataStore } from '../store/useDataStore';
 import { useIsAdmin } from '../store/useAuthStore';
+import { PageSkeleton } from '../components/ui/PageSkeleton';
 import type { Sprint, TaskStatus } from '../data/mockData';
 
 const statusTabs: { value: string; labelEn: string; labelAr: string }[] = [
@@ -21,7 +22,7 @@ const statusTabs: { value: string; labelEn: string; labelAr: string }[] = [
 export function Sprints() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
-  const { sprints, projects, addSprint, updateSprint, deleteSprint } = useDataStore();
+  const { sprints, projects, addSprint, updateSprint, deleteSprint, isLoading } = useDataStore();
   const [editingSprint, setEditingSprint] = useState<Sprint | null>(null);
   const isAdmin = useIsAdmin();
   const [activeTab, setActiveTab] = useState('all');
@@ -53,6 +54,8 @@ export function Sprints() {
     .reduce((sum, s) => sum + s.velocity, 0);
   const completedSprints = sprints.filter((s) => s.status === 'completed').length;
   const avgVelocity = completedSprints > 0 ? Math.round(totalVelocity / completedSprints) : 0;
+
+  if (isLoading) return <PageSkeleton />;
 
   return (
     <div className="min-h-screen">
