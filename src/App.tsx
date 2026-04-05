@@ -9,6 +9,7 @@ import { Sprints } from './pages/Sprints';
 import { Team } from './pages/Team';
 import { Settings } from './pages/Settings';
 import { Import } from './pages/Import';
+import { Backlog } from './pages/Backlog';
 import { useAuthStore, useIsAdmin } from './store/useAuthStore';
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
@@ -48,6 +49,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/board" element={<Board />} />
+        <Route path="/backlog" element={<Backlog />} />
         <Route path="/design-items" element={<DesignItems />} />
         <Route path="/sprints" element={<Sprints />} />
         <Route path="/team" element={<AdminRoute><Team /></AdminRoute>} />

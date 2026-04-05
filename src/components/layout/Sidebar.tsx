@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ChevronRight,
   Layers,
+  Inbox,
 } from 'lucide-react';
 import { useSidebarStore } from '../../store/useSidebarStore';
 import { useIsAdmin } from '../../store/useAuthStore';
@@ -25,6 +26,7 @@ const navItems = [
   { path: '/', icon: LayoutDashboard, labelKey: 'nav.dashboard', color: 'purple' },
   { path: '/projects', icon: FolderKanban, labelKey: 'nav.projects', color: 'blue' },
   { path: '/board', icon: Columns3, labelKey: 'nav.board', color: 'cyan', hasTree: true },
+  { path: '/backlog', icon: Inbox, labelKey: 'nav.backlog', color: 'gray' },
   { path: '/design-items', icon: Palette, labelKey: 'nav.designItems', color: 'pink' },
   { path: '/sprints', icon: Timer, labelKey: 'nav.sprints', color: 'amber' },
   { path: '/team', icon: Users, labelKey: 'nav.team', color: 'green', adminOnly: true },
