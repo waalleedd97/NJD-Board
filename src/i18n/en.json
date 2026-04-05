@@ -62,7 +62,7 @@
     "noTasks": "No tasks",
     "taskCount": "{{count}} tasks",
     "dueDate": "Due date",
-    "storyPoints": "Story Points",
+    "storyPoints": "Work Hours",
     "addTask": "Add Task"
   },
   "designItems": {

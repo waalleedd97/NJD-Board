@@ -380,7 +380,7 @@ function TaskCard({ task, isAr, onClick, cardStyle, thumbnail }: {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             {assignee && <span className="text-sm" title={isAr ? assignee.nameAr : assignee.name}>{assignee.avatar}</span>}
-            {task.storyPoints > 0 && <span className="text-[10px] font-bold text-muted dark:text-gray-400 bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">{task.storyPoints}pt</span>}
+            {task.storyPoints > 0 && <span className="text-[10px] font-bold text-muted dark:text-gray-400 bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">{task.storyPoints}h</span>}
           </div>
           {task.dueDate && (
             <div className="flex items-center gap-1">
@@ -560,7 +560,7 @@ function TaskPanel({ task, isAr, onClose, onUpdate, onDelete }: {
               </div>
             </div>
             <div><p className={fieldLabel}><Calendar size={10} className="inline mb-0.5" /> {isAr ? 'تاريخ الاستحقاق' : 'Due Date'}</p><input type="date" value={task.dueDate || ''} onChange={(e) => onUpdate({ dueDate: e.target.value })} className="text-sm bg-transparent border-none outline-none cursor-pointer text-ink dark:text-white p-0" /></div>
-            <div><p className={fieldLabel}>{isAr ? 'النقاط' : 'Story Points'}</p><p className="text-sm text-ink dark:text-white font-bold">{task.storyPoints} <span className="text-muted font-normal">pts</span></p></div>
+            <div><p className={fieldLabel}>{isAr ? 'ساعات العمل' : 'Work Hours'}</p><p className="text-sm text-ink dark:text-white font-bold">{task.storyPoints} <span className="text-muted font-normal">{isAr ? 'ساعة' : 'hrs'}</span></p></div>
             <div><p className={fieldLabel}><Tag size={10} className="inline mb-0.5" /> {isAr ? 'الوسوم' : 'Tags'}</p><div className="flex flex-wrap gap-1">{(isAr ? task.tagsAr : task.tags).map((tag) => <span key={tag} className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-muted dark:text-gray-400">{tag}</span>)}{task.tags.length === 0 && <p className="text-sm text-muted">—</p>}</div></div>
           </div>
 
@@ -693,7 +693,7 @@ const OPTIONAL_FIELDS: { key: OptionalField; en: string; ar: string }[] = [
   { key: 'priority', en: 'Priority', ar: 'الأولوية' },
   { key: 'tags', en: 'Tags', ar: 'الوسوم' },
   { key: 'dueDate', en: 'Due Date', ar: 'تاريخ الاستحقاق' },
-  { key: 'storyPoints', en: 'Story Points', ar: 'النقاط' },
+  { key: 'storyPoints', en: 'Work Hours', ar: 'ساعات العمل' },
 ];
 
 const FIELDS_STORAGE_KEY = 'njd_create_task_fields';
@@ -761,7 +761,7 @@ function CreateTaskModal({ isAr, projects, sprints, defaultProjectId, defaultSpr
           {has('priority') && <div><label className="block text-xs font-medium text-muted dark:text-gray-400 mb-1">{isAr ? 'الأولوية' : 'Priority'}</label><select value={priority} onChange={(e) => setPriority(e.target.value as Task['priority'])} className={sel}><option value="low">🟢 {isAr ? 'منخفض' : 'Low'}</option><option value="medium">🟡 {isAr ? 'متوسط' : 'Medium'}</option><option value="high">🟠 {isAr ? 'عالي' : 'High'}</option><option value="critical">🔴 {isAr ? 'حرج' : 'Critical'}</option></select></div>}
           {has('description') && <div><label className="block text-xs font-medium text-muted dark:text-gray-400 mb-1">{isAr ? 'الوصف' : 'Description'}</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={isAr ? 'وصف اختياري...' : 'Optional description...'} className={sel + ' h-20 py-2 resize-none'} /></div>}
           {has('dueDate') && <div><label className="block text-xs font-medium text-muted dark:text-gray-400 mb-1">{isAr ? 'تاريخ الاستحقاق' : 'Due Date'}</label><input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={sel} /></div>}
-          {has('storyPoints') && <div><label className="block text-xs font-medium text-muted dark:text-gray-400 mb-1">{isAr ? 'النقاط' : 'Story Points'}</label><input type="number" value={storyPoints} onChange={(e) => setStoryPoints(Number(e.target.value))} className={sel} min={0} /></div>}
+          {has('storyPoints') && <div><label className="block text-xs font-medium text-muted dark:text-gray-400 mb-1">{isAr ? 'ساعات العمل' : 'Work Hours'}</label><input type="number" value={storyPoints} onChange={(e) => setStoryPoints(Number(e.target.value))} className={sel} min={0} /></div>}
           {has('tags') && <div><label className="block text-xs font-medium text-muted dark:text-gray-400 mb-1">{isAr ? 'الوسوم' : 'Tags'}</label><div className="flex gap-2"><input value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); handleAddTag(); } }} placeholder={isAr ? 'أضف وسم...' : 'Add tag...'} className={sel + ' flex-1'} /><button type="button" onClick={handleAddTag} className="px-3 h-11 rounded-xl text-sm font-medium bg-gray-100 dark:bg-white/5 text-muted hover:text-ink dark:hover:text-white border border-gray-200 dark:border-white/10 transition-colors">+</button></div>{tags.length > 0 && <div className="flex flex-wrap gap-1.5 mt-2">{tags.map((tag) => <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium bg-primary/10 text-primary dark:bg-primary/20 dark:text-night-accent">{tag}<button onClick={() => setTags(tags.filter((t) => t !== tag))} className="hover:text-red-500 transition-colors"><X size={10} /></button></span>)}</div>}</div>}
         </div>
         <div className="px-6 pb-6 pt-4 space-y-3">

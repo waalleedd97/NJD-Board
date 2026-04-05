@@ -62,7 +62,7 @@
     "noTasks": "لا توجد مهام",
     "taskCount": "{{count}} مهمة",
     "dueDate": "تاريخ الاستحقاق",
-    "storyPoints": "نقاط القصة",
+    "storyPoints": "ساعات العمل",
     "addTask": "إضافة مهمة"
   },
   "designItems": {
