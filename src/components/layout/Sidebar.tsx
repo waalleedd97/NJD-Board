@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
@@ -42,7 +41,7 @@ export function Sidebar() {
   const isAdmin = useIsAdmin();
   const { projects, sprints, tasks } = useDataStore();
 
-  const [boardOpen, setBoardOpen] = useState(location.pathname === '/board');
+  const boardOpen = location.pathname === '/board';
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
@@ -87,7 +86,6 @@ export function Sidebar() {
                   onClick={(e) => {
                     if (isBoard) {
                       e.preventDefault();
-                      if (!boardOpen) setBoardOpen(true);
                       navigate('/board');
                     }
                   }}
@@ -119,16 +117,11 @@ export function Sidebar() {
                     )}
                   </AnimatePresence>
 
-                  {/* Expand chevron for Board */}
+                  {/* Expand indicator for Board */}
                   {isBoard && !isCollapsed && (
-                    <button
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoardOpen(!boardOpen); }}
-                      className="p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                    >
-                      <motion.div animate={{ rotate: boardOpen ? 0 : (isRTL ? 90 : -90) }} transition={{ duration: 0.15 }}>
-                        <ChevronDown size={14} />
-                      </motion.div>
-                    </button>
+                    <motion.div animate={{ rotate: boardOpen ? 0 : (isRTL ? 90 : -90) }} transition={{ duration: 0.15 }}>
+                      <ChevronDown size={14} />
+                    </motion.div>
                   )}
 
                   {/* Tooltip when collapsed */}
