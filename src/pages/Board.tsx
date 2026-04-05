@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -74,14 +75,23 @@ const PRIORITY_CONFIG: Record<string, { label: string; labelAr: string }> = {
 export function Board() {
   const { t, i18n } = useTranslation();
   const isAr = i18n.language === 'ar';
+  const [searchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [projectFilter, setProjectFilter] = useState('all');
-  const [sprintFilter, setSprintFilter] = useState('all');
+  const [projectFilter, setProjectFilter] = useState(searchParams.get('project') || 'all');
+  const [sprintFilter, setSprintFilter] = useState(searchParams.get('sprint') || 'all');
   const [assigneeFilter, setAssigneeFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const { tasks, projects, sprints, teamMembers, addTask, updateTask, deleteTask, isLoading } = useDataStore();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  // Sync filters from URL params (when clicking sidebar tree)
+  useEffect(() => {
+    const p = searchParams.get('project');
+    const s = searchParams.get('sprint');
+    if (p) setProjectFilter(p);
+    if (s) setSprintFilter(s);
+  }, [searchParams]);
   const [showCreate, setShowCreate] = useState(false);
   const [taskThumbnails, setTaskThumbnails] = useState<Record<string, string>>({});
 
