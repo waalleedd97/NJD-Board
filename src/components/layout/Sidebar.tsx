@@ -165,15 +165,15 @@ export function Sidebar() {
                                   const proj = projects.find((p) => tasks.some((t) => t.sprintId === board.id && t.projectId === p.id));
                                   navigate(`/board?project=${proj?.id || 'all'}&sprint=${board.id}`);
                                 }}
-                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors
+                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors
                                   ${isActive
                                     ? 'text-primary dark:text-night-accent font-semibold bg-primary/5 dark:bg-primary/10'
-                                    : 'text-muted hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                                    : 'text-ink/70 dark:text-gray-300 hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
                                   }
                                 `}
                                 style={{ paddingInlineStart: 20 }}
                               >
-                                <Layers size={14} className="shrink-0 opacity-50" />
+                                <Layers size={14} className="shrink-0 opacity-60" />
                                 <span className="flex-1 text-start truncate">
                                   {isRTL ? board.nameAr : board.name}
                                   {board.count > 0 && <span className="opacity-50"> ({board.count})</span>}
