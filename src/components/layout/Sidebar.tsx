@@ -14,6 +14,8 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   ChevronDown,
+  ChevronRight,
+  Layers,
 } from 'lucide-react';
 import { useSidebarStore } from '../../store/useSidebarStore';
 import { useIsAdmin } from '../../store/useAuthStore';
@@ -38,20 +40,19 @@ export function Sidebar() {
   const { isCollapsed, toggleCollapse } = useSidebarStore();
   const isRTL = i18n.language === 'ar';
   const isAdmin = useIsAdmin();
-  const { projects, sprints } = useDataStore();
+  const { projects, sprints, tasks } = useDataStore();
 
-  const [boardTreeOpen, setBoardTreeOpen] = useState(false);
-  const [expandedProject, setExpandedProject] = useState<string | null>(null);
+  const [boardOpen, setBoardOpen] = useState(location.pathname === '/board');
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
-  const handleSprintClick = (projectId: string, sprintId: string) => {
-    navigate(`/board?project=${projectId}&sprint=${sprintId}`);
-  };
+  // Build flat board list: each sprint with its task count
+  const boardList = sprints.map((sprint) => {
+    const count = tasks.filter((t) => t.sprintId === sprint.id).length;
+    return { ...sprint, count };
+  });
 
-  const handleProjectClick = (projectId: string) => {
-    navigate(`/board?project=${projectId}`);
-  };
+  const activeSprint = new URLSearchParams(location.search).get('sprint');
 
   return (
     <motion.aside
@@ -71,149 +72,114 @@ export function Sidebar() {
       animate={{ width: isCollapsed ? 80 : 272 }}
       transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
     >
-      {/* ── Nav ──────────────────────────── */}
       <nav className="flex-1 py-4 px-3 overflow-y-auto">
         <ul className="space-y-1">
           {visibleItems.map((item) => {
-            const active = location.pathname === item.path;
+            const active = location.pathname === item.path && !item.hasTree;
+            const isBoardActive = item.hasTree && location.pathname === '/board';
             const isBoard = item.hasTree;
 
             return (
               <li key={item.path}>
                 {/* Nav link */}
-                <div className="flex items-center">
-                  <Link
-                    to={item.path}
-                    className={`
-                      group flex-1 flex items-center gap-3 px-3 py-2.5 rounded-xl
-                      transition-all duration-200
-                      ${active
-                        ? 'bg-lavender dark:bg-primary/20 text-primary dark:text-night-accent font-semibold'
-                        : 'text-muted hover:bg-gray-100 dark:hover:bg-white/5 hover:text-ink dark:hover:text-white'
-                      }
-                    `}
-                  >
-                    {active ? (
-                      <Icon3D icon={item.icon} color={item.color} size="sm" />
-                    ) : (
-                      <item.icon size={20} className="shrink-0" />
-                    )}
+                <Link
+                  to={item.path}
+                  onClick={(e) => {
+                    if (isBoard) {
+                      e.preventDefault();
+                      if (!boardOpen) setBoardOpen(true);
+                      navigate('/board');
+                    }
+                  }}
+                  className={`
+                    group flex items-center gap-3 px-3 py-2.5 rounded-xl
+                    transition-all duration-200
+                    ${(active || isBoardActive)
+                      ? 'bg-lavender dark:bg-primary/20 text-primary dark:text-night-accent font-semibold'
+                      : 'text-muted hover:bg-gray-100 dark:hover:bg-white/5 hover:text-ink dark:hover:text-white'
+                    }
+                  `}
+                >
+                  {(active || isBoardActive) ? (
+                    <Icon3D icon={item.icon} color={item.color} size="sm" />
+                  ) : (
+                    <item.icon size={20} className="shrink-0" />
+                  )}
 
-                    <AnimatePresence>
-                      {!isCollapsed && (
-                        <motion.span
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="text-sm whitespace-nowrap flex-1"
-                        >
-                          {t(item.labelKey)}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Expand arrow for Board */}
-                    {isBoard && !isCollapsed && (
-                      <button
-                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoardTreeOpen(!boardTreeOpen); }}
-                        className="p-0.5 rounded hover:bg-white/10 transition-colors"
+                  <AnimatePresence>
+                    {!isCollapsed && (
+                      <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="text-sm whitespace-nowrap flex-1"
                       >
-                        <motion.div animate={{ rotate: boardTreeOpen ? (isRTL ? 90 : 0) : (isRTL ? 0 : -90) }} transition={{ duration: 0.2 }}>
-                          <ChevronDown size={14} />
-                        </motion.div>
-                      </button>
+                        {t(item.labelKey)}
+                      </motion.span>
                     )}
+                  </AnimatePresence>
 
-                    {/* Tooltip when collapsed */}
-                    {isCollapsed && (
-                      <div
-                        className="pointer-events-none absolute opacity-0 group-hover:opacity-100 transition-opacity z-50"
-                        style={{ [isRTL ? 'right' : 'left']: '100%', [isRTL ? 'marginRight' : 'marginLeft']: 8 }}
-                      >
-                        <div className="bg-ink text-white text-xs font-medium rounded-lg px-3 py-1.5 whitespace-nowrap shadow-lg">
-                          {t(item.labelKey)}
-                        </div>
+                  {/* Expand chevron for Board */}
+                  {isBoard && !isCollapsed && (
+                    <button
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setBoardOpen(!boardOpen); }}
+                      className="p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                    >
+                      <motion.div animate={{ rotate: boardOpen ? 0 : (isRTL ? 90 : -90) }} transition={{ duration: 0.15 }}>
+                        <ChevronDown size={14} />
+                      </motion.div>
+                    </button>
+                  )}
+
+                  {/* Tooltip when collapsed */}
+                  {isCollapsed && (
+                    <div
+                      className="pointer-events-none absolute opacity-0 group-hover:opacity-100 transition-opacity z-50"
+                      style={{ [isRTL ? 'right' : 'left']: '100%', [isRTL ? 'marginRight' : 'marginLeft']: 8 }}
+                    >
+                      <div className="bg-ink text-white text-xs font-medium rounded-lg px-3 py-1.5 whitespace-nowrap shadow-lg">
+                        {t(item.labelKey)}
                       </div>
-                    )}
-                  </Link>
-                </div>
+                    </div>
+                  )}
+                </Link>
 
-                {/* ── Board tree: Project → Sprints ── */}
+                {/* ── Board list (flat, like HacknPlan) ── */}
                 {isBoard && !isCollapsed && (
                   <AnimatePresence>
-                    {boardTreeOpen && (
+                    {boardOpen && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
+                        transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="mt-1 space-y-0.5">
-                          {projects.map((project) => {
-                            const linkedSprints = sprints.filter((s) =>
-                              useDataStore.getState().tasks.some((t) => t.sprintId === s.id && t.projectId === project.id)
-                            );
-                            const isExpanded = expandedProject === project.id;
-
+                        <div className="mt-1 py-1 border-t border-gray-200/30 dark:border-white/5">
+                          {boardList.map((board) => {
+                            const isActive = activeSprint === board.id;
                             return (
-                              <div key={project.id}>
-                                {/* Project level */}
-                                <button
-                                  onClick={() => {
-                                    setExpandedProject(isExpanded ? null : project.id);
-                                    handleProjectClick(project.id);
-                                  }}
-                                  className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors
-                                    ${isExpanded ? 'text-primary dark:text-night-accent bg-primary/5 dark:bg-primary/10' : 'text-muted hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'}
-                                  `}
-                                  style={{ paddingInlineStart: 36 }}
-                                >
-                                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: project.color }} />
-                                  <span className="flex-1 text-start truncate font-medium">{isRTL ? project.nameAr : project.name}</span>
-                                  <motion.div animate={{ rotate: isExpanded ? 0 : (isRTL ? 0 : -90) }} transition={{ duration: 0.15 }}>
-                                    <ChevronDown size={12} />
-                                  </motion.div>
-                                </button>
-
-                                {/* Sprint level */}
-                                <AnimatePresence>
-                                  {isExpanded && (
-                                    <motion.div
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: 'auto', opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.2 }}
-                                      className="overflow-hidden"
-                                    >
-                                      <div className="space-y-0.5 mt-0.5">
-                                        {linkedSprints.length > 0 ? linkedSprints.map((sprint) => {
-                                          const sprintActive = new URLSearchParams(location.search).get('sprint') === sprint.id;
-                                          return (
-                                            <button
-                                              key={sprint.id}
-                                              onClick={() => handleSprintClick(project.id, sprint.id)}
-                                              className={`w-full text-start px-3 py-1.5 rounded-lg text-[11px] transition-colors truncate
-                                                ${sprintActive ? 'text-primary dark:text-night-accent font-semibold bg-primary/10 dark:bg-primary/15' : 'text-muted hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'}
-                                              `}
-                                              style={{ paddingInlineStart: 52 }}
-                                            >
-                                              <span className="flex items-center gap-1.5">
-                                                <Timer size={10} className="shrink-0 opacity-60" />
-                                                {isRTL ? sprint.nameAr : sprint.name}
-                                              </span>
-                                            </button>
-                                          );
-                                        }) : (
-                                          <p className="text-[10px] text-muted px-3 py-1" style={{ paddingInlineStart: 52 }}>
-                                            {isRTL ? 'لا يوجد سبرنتات' : 'No sprints'}
-                                          </p>
-                                        )}
-                                      </div>
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
+                              <button
+                                key={board.id}
+                                onClick={() => {
+                                  const proj = projects.find((p) => tasks.some((t) => t.sprintId === board.id && t.projectId === p.id));
+                                  navigate(`/board?project=${proj?.id || 'all'}&sprint=${board.id}`);
+                                }}
+                                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] transition-colors
+                                  ${isActive
+                                    ? 'text-primary dark:text-night-accent font-semibold bg-primary/5 dark:bg-primary/10'
+                                    : 'text-muted hover:text-ink dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                                  }
+                                `}
+                                style={{ paddingInlineStart: 20 }}
+                              >
+                                <Layers size={14} className="shrink-0 opacity-50" />
+                                <span className="flex-1 text-start truncate">
+                                  {isRTL ? board.nameAr : board.name}
+                                  {board.count > 0 && <span className="opacity-50"> ({board.count})</span>}
+                                </span>
+                                <ChevronRight size={12} className="shrink-0 opacity-30" />
+                              </button>
                             );
                           })}
                         </div>
@@ -243,34 +209,13 @@ export function Sidebar() {
   );
 }
 
-/* ── Helper ────────────────────────────── */
-function SidebarButton({
-  icon,
-  label,
-  collapsed,
-  onClick,
-}: {
-  icon: React.ReactNode;
-  label?: string;
-  collapsed: boolean;
-  onClick: () => void;
-}) {
+function SidebarButton({ icon, label, collapsed, onClick }: { icon: React.ReactNode; label?: string; collapsed: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-muted hover:bg-gray-100 dark:hover:bg-white/5 hover:text-ink dark:hover:text-white transition-colors"
-    >
+    <button onClick={onClick} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-muted hover:bg-gray-100 dark:hover:bg-white/5 hover:text-ink dark:hover:text-white transition-colors">
       {icon}
       <AnimatePresence>
         {!collapsed && label && (
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="text-sm whitespace-nowrap"
-          >
-            {label}
-          </motion.span>
+          <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm whitespace-nowrap">{label}</motion.span>
         )}
       </AnimatePresence>
     </button>
