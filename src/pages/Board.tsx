@@ -222,11 +222,13 @@ export function Board() {
               ]}
             />
           </div>
-          <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors shrink-0">
-            <Plus size={18} />
-            {isAr ? 'مهمة جديدة' : 'New Task'}
-          </button>
         </div>
+
+        {/* New Task button — fixed bottom-right so it doesn't move when task panel opens */}
+        <button onClick={() => setShowCreate(true)} className={`fixed bottom-6 ${isAr ? 'left-6' : 'right-6'} z-20 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors shadow-lg`}>
+          <Plus size={18} />
+          {isAr ? 'مهمة جديدة' : 'New Task'}
+        </button>
 
         {/* Create task modal */}
         <AnimatePresence>

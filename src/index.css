@@ -63,6 +63,12 @@ html.dark body {
   background: #374151;
 }
 
+/* Native select options — force readable colors on Windows dropdowns */
+select option {
+  background-color: #ffffff;
+  color: #1E1B2E;
+}
+
 /* Background dot pattern */
 .bg-pattern {
   background-image: radial-gradient(circle at 1px 1px, rgba(124, 58, 237, 0.04) 1px, transparent 0);
