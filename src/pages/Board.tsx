@@ -27,6 +27,7 @@ import { useAuthStore, useIsAdmin } from '../store/useAuthStore';
 import { supabaseData } from '../lib/supabase';
 import { uploadFile, isImageFile } from '../lib/upload';
 import { PageSkeleton } from '../components/ui/PageSkeleton';
+import { BoardFilterPanel } from '../components/ui/BoardFilterPanel';
 import type { Task, TaskStatus } from '../data/mockData';
 
 // ── Category color + emoji maps ──
@@ -194,9 +195,19 @@ export function Board() {
   if (isLoading) return <PageSkeleton variant="board" />;
 
   return (
-    <div className="min-h-screen bg-[var(--color-board-bg)] dark:bg-[var(--color-board-bg-dark)]">
-      {/* Board area — adds padding when panel open */}
-      <div className={`overflow-hidden ${panelOpen ? (isAr ? 'pr-0 pl-[44%]' : 'pl-0 pr-[44%]') : ''}`} onClick={() => { if (panelOpen) setSelectedTask(null); }}>
+    <div className="min-h-screen bg-[var(--color-board-bg)] dark:bg-[var(--color-board-bg-dark)] flex">
+      {/* Category/User filter panel */}
+      <BoardFilterPanel
+        tasks={tasks}
+        members={teamMembers}
+        selectedCategory={categoryFilter}
+        selectedMember={assigneeFilter}
+        onCategoryChange={setCategoryFilter}
+        onMemberChange={setAssigneeFilter}
+      />
+
+      {/* Board area */}
+      <div className={`flex-1 min-w-0 overflow-hidden ${panelOpen ? (isAr ? 'pr-0 pl-[44%]' : 'pl-0 pr-[44%]') : ''}`} onClick={() => { if (panelOpen) setSelectedTask(null); }}>
       <div className="p-6 space-y-6">
         {/* Context summary */}
         <p className="text-xs text-muted dark:text-gray-400">
