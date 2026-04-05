@@ -268,16 +268,13 @@ export function Board() {
 
         {/* Kanban Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          {boardColumns.map((column, colIdx) => {
+          {boardColumns.map((column) => {
             const columnTasks = getColumnTasks(column.id);
             const cs = COLUMN_STYLES[column.id] ?? COLUMN_STYLES['todo'];
             return (
-              <motion.div
+              <div
                 key={column.id}
                 className={`rounded-2xl border overflow-hidden ${cs.wellBg} ${cs.wellBorder}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: colIdx * 0.08 }}
               >
                 {/* Column header — connected to body */}
                 <div className={`flex items-center justify-between px-3 py-2 border-t-[3px] ${cs.border} ${cs.headerBg}`}>
@@ -295,12 +292,11 @@ export function Board() {
                       {t('board.noTasks')}
                     </div>
                   ) : (
-                    columnTasks.map((task, taskIdx) => (
+                    columnTasks.map((task) => (
                       <TaskCard
                         key={task.id}
                         task={task}
                         isAr={isAr}
-                        delay={colIdx * 0.08 + taskIdx * 0.05}
                         onClick={() => setSelectedTask(task)}
                         cardStyle={cs}
                         thumbnail={taskThumbnails[task.id]}
@@ -308,7 +304,7 @@ export function Board() {
                     ))
                   )}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>
@@ -333,8 +329,8 @@ export function Board() {
 
 // ── Task Card ──
 
-function TaskCard({ task, isAr, delay, onClick, cardStyle, thumbnail }: {
-  task: Task; isAr: boolean; delay: number; onClick: () => void;
+function TaskCard({ task, isAr, onClick, cardStyle, thumbnail }: {
+  task: Task; isAr: boolean; onClick: () => void;
   cardStyle: { cardBg: string; cardBorder: string };
   thumbnail?: string;
 }) {
@@ -348,7 +344,6 @@ function TaskCard({ task, isAr, delay, onClick, cardStyle, thumbnail }: {
   return (
     <motion.div
       className={`group cursor-pointer rounded-xl overflow-hidden border shadow-sm hover:shadow-md hover:border-primary/30 dark:hover:border-night-accent/30 transition-all duration-200 ${cardStyle.cardBg} ${cardStyle.cardBorder}`}
-      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay }}
       onClick={onClick} whileHover={{ y: -2 }}
     >
       {/* Attachment thumbnail */}
