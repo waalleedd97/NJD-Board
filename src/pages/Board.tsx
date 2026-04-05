@@ -378,16 +378,21 @@ function TaskCard({ task, isAr, onClick, cardStyle, thumbnail }: {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {assignee && <span className="text-sm" title={isAr ? assignee.nameAr : assignee.name}>{assignee.avatar}</span>}
-            {task.storyPoints > 0 && <span className="text-[10px] font-bold text-muted dark:text-gray-400 bg-gray-100 dark:bg-white/10 px-1.5 py-0.5 rounded">{task.storyPoints}h</span>}
+          {assignee && <span className="text-sm" title={isAr ? assignee.nameAr : assignee.name}>{assignee.avatar}</span>}
+          <div className="flex items-center gap-2.5">
+            {task.storyPoints > 0 && (
+              <span className="flex items-center gap-1 text-[10px] font-semibold text-muted dark:text-gray-400">
+                <Timer size={10} className="shrink-0" />
+                {task.storyPoints}h
+              </span>
+            )}
+            {task.dueDate && (
+              <span className={`flex items-center gap-1 text-[10px] font-semibold ${isOverdue() ? 'text-red-500' : isDueSoon() ? 'text-amber-500' : 'text-muted dark:text-gray-400'}`}>
+                <Calendar size={10} className="shrink-0" />
+                {new Date(task.dueDate).toLocaleDateString(isAr ? 'ar-SA' : 'en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            )}
           </div>
-          {task.dueDate && (
-            <div className="flex items-center gap-1">
-              <Calendar size={11} className={`${isOverdue() ? 'text-red-500' : isDueSoon() ? 'text-amber-500' : 'text-muted dark:text-gray-500'}`} />
-              <span className={`text-[10px] ${isOverdue() ? 'text-red-500 font-medium' : isDueSoon() ? 'text-amber-500' : 'text-muted dark:text-gray-500'}`}>{task.dueDate.slice(5)}</span>
-            </div>
-          )}
         </div>
       </div>
     </motion.div>
