@@ -8,7 +8,7 @@
 - React + Vite + TypeScript + Tailwind CSS v4
 - Two Supabase clients: auth (iauulqfgrbegwcnfatmx) and data (xdiqvvctdwbexfyoqrzh)
 - Deployed on Vercel at board.njd-services.net
-- Shared navbar web component loaded from njd-services.net/njd-navbar.js
+- Shared navbar web component is **vendored locally** at `public/njd-navbar.js` (served same-origin as `/njd-navbar.js` from index.html). Source of truth stays in the Landing Page project — do NOT edit the vendored copy in place (changes are lost on next sync). To re-vendor after a Landing update: copy Landing's `public/njd-navbar.js` → this repo's `public/njd-navbar.js`, update the vendor header (Last synced / SHA-256 / MD5), do the same in the HR repo. Same-origin loading avoids cross-origin CSP issues (Vercel 307s the apex `njd-services.net` → `www.njd-services.net`).
 - RTL-first (Arabic primary), bilingual AR/EN
 
 ## Important

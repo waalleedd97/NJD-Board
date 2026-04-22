@@ -84,8 +84,9 @@ export function AppLayout() {
       style={{ direction: isRTL ? 'rtl' : 'ltr' }}
       className="min-h-screen bg-white dark:bg-night bg-pattern"
     >
+      {/* logo="/njd-logo.png" overrides the navbar's default absolute Landing URL so the logo loads same-origin. */}
       {/* @ts-expect-error njd-navbar is a web component */}
-      <njd-navbar lang={i18n.language} app="board" user-name={user ? (isRTL ? user.nameAr : user.name) : ''} notification-count={unreadCount} />
+      <njd-navbar lang={i18n.language} app="board" logo="/njd-logo.png" user-name={user ? (isRTL ? user.nameAr : user.name) : ''} notification-count={unreadCount} />
 
       {/* Notification dropdown — positioned relative to navbar */}
       <NotificationBell />
