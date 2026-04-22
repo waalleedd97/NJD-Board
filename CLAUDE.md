@@ -1,8 +1,10 @@
-## Deployment
-- After code changes, run `vercel --prod` once and move on
-- Do NOT poll deployment status or wait for Vercel to finish
-- Do NOT cancel or retry deployments
-- Do NOT run `vercel inspect` or check deployment status
+## Deployment Flow (Mandatory)
+1. `git add` + `git commit`
+2. `git push origin <branch>`
+3. If the branch is `main` → Vercel deploys automatically via the GitHub integration
+4. If it's any other branch → open a PR and merge into `main` first; the merge commit on `main` is what triggers the deploy
+
+**Do NOT run `vercel --prod` (or any `vercel deploy*`) manually.** Manual CLI deploys bypass GitHub, so the code that's live on production can drift from what reviewers see on `main` — exactly what happened earlier (main was 33 commits behind production because every deploy went through the CLI and `git push` never ran).
 
 ## Tech Stack
 - React + Vite + TypeScript + Tailwind CSS v4
